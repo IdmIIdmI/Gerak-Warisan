@@ -4,13 +4,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>SUPER DURIAN</title>
+<title>SUPER DURIAN V2</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#102b35;color:white;font-family:Arial;overflow:hidden}
 canvas{display:block;width:100vw;height:100vh}
 #ui{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;font-weight:bold;text-shadow:1px 2px 3px #000}
-#status{position:absolute;bottom:15px;left:50%;transform:translateX(-50%);background:#102b35eF;border:2px solid #8ee66b;padding:12px;border-radius:20px;text-align:center;font-size:13px;max-width:94%;white-space:normal}
+#status{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:#102b35ed;border:2px solid #8ee66b;padding:11px 16px;border-radius:20px;text-align:center;font-size:13px;max-width:95%;width:max-content}
 #start{position:absolute;inset:0;background:#102b35ee;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
 button{background:#ffc928;border:0;padding:15px 25px;border-radius:12px;font-size:18px;font-weight:bold;margin:5px}
 .small{font-size:13px;line-height:1.8;color:#d9eddf}
@@ -21,32 +21,32 @@ button{background:#ffc928;border:0;padding:15px 25px;border-radius:12px;font-siz
 <canvas id="game"></canvas>
 
 <div id="ui">
-<span>🍈 SUPER DURIAN</span>
-<span>⭐ <b id="score">0</b></span>
+ <span>🍈 SUPER DURIAN</span>
+ <span>⭐ <b id="score">0</b></span>
 </div>
 
 <div id="status">🎤 Mikrofon belum aktif</div>
 
 <div id="start">
-<h1>🍈 SUPER DURIAN</h1>
-<h3>Pengembaraan Zikir</h3>
-<p class="small">
-SUBHANALLAH = MAJU<br>
-MASYAALLAH = UNDUR<br>
-ALLAH = LOMPAT<br>
-ALLAH ALLAH = LOMPAT TINGGI<br>
-ALHAMDULILLAH = TEMBAK<br>
-ALLAHU AKBAR = BERHENTI
-</p>
-<button onclick="startGame()">▶ MULA PERMAINAN</button>
-<p class="small">Benarkan akses mikrofon apabila diminta.<br>Gunakan Chrome melalui laman HTTPS.</p>
+ <h1>🍈 SUPER DURIAN</h1>
+ <h3>Pengembaraan Zikir</h3>
+ <p class="small">
+ SUBHANALLAH = MAJU<br>
+ MASYAALLAH = UNDUR<br>
+ ALLAH = LOMPAT<br>
+ ALLAH ALLAH = LOMPAT TINGGI<br>
+ ALHAMDULILLAH = TEMBAK<br>
+ ALLAHU AKBAR = BERHENTI
+ </p>
+ <button onclick="startGame()">▶ MULA PERMAINAN</button>
+ <p class="small">Benarkan akses mikrofon.<br>Gunakan Chrome melalui HTTPS.</p>
 </div>
 
 <script>
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
-let W,H;
 
+let W,H;
 function resize(){
  W=canvas.width=innerWidth;
  H=canvas.height=innerHeight;
@@ -55,12 +55,17 @@ resize();
 addEventListener("resize",resize);
 
 let running=false;
-let player={x:100,y:0,w:38,h:48,vx:0,vy:0,ground:false};
+let player={
+ x:100,y:0,w:42,h:76,
+ vx:0,vy:0,ground:false,
+ facing:1,walk:0
+};
+
 let camera=0,score=0;
 let platforms=[],enemies=[],bullets=[];
 let moveDir=0,moveUntil=0,combo=0,lastMove=0;
-let speech=null;
-let restarting=false;
+let speech=null,restarting=false;
+let lastInterim="";
 
 const status=document.getElementById("status");
 
@@ -73,7 +78,8 @@ function world(){
  {x:650,y:H-220,w:170},
  {x:1100,y:H-180,w:180},
  {x:1450,y:H-230,w:170},
- {x:1900,y:H-190,w:180}
+ {x:1900,y:H-190,w:180},
+ {x:2250,y:H-250,w:170}
  ];
 
  enemies=[
@@ -81,10 +87,12 @@ function world(){
  {x:720,y:H-260,alive:true},
  {x:1180,y:H-225,alive:true},
  {x:1550,y:H-105,alive:true},
- {x:2020,y:H-235,alive:true}
+ {x:2020,y:H-235,alive:true},
+ {x:2320,y:H-295,alive:true}
  ];
 }
 
+// MULAKAN GAME
 function startGame(){
  if(running)return;
 
@@ -92,7 +100,7 @@ function startGame(){
  window.webkitSpeechRecognition;
 
  if(!SR){
-  status.textContent="❌ Browser tidak menyokong Voice Recognition. Cuba Google Chrome.";
+  status.textContent="❌ Pelayar tidak menyokong pengecaman suara. Cuba Chrome.";
   return;
  }
 
@@ -118,6 +126,7 @@ function startGame(){
  requestAnimationFrame(loop);
 }
 
+// SISTEM MIKROFON
 function startVoice(){
  const SR=window.SpeechRecognition||
  window.webkitSpeechRecognition;
@@ -125,31 +134,32 @@ function startVoice(){
  speech=new SR();
  speech.lang="ms-MY";
  speech.continuous=true;
- speech.interimResults=false;
+ speech.interimResults=true;
  speech.maxAlternatives=3;
 
  speech.onstart=()=>{
-  status.textContent="🎤 MIKROFON AKTIF — Sebut arahan zikir";
+  status.textContent="🟢 MIKROFON AKTIF — SEBUT ZIKIR";
  };
 
  speech.onresult=e=>{
   for(let i=e.resultIndex;i<e.results.length;i++){
-   if(e.results[i].isFinal){
-    const result=e.results[i];
-    let words=[];
+   let result=e.results[i];
+   let transcript=result[0].transcript;
 
-    for(let j=0;j<result.length;j++){
-     words.push(result[j].transcript);
-    }
-
-    processVoice(words.join(" "));
+   if(result.isFinal){
+    lastInterim="";
+    processVoice(transcript);
+   }else{
+    lastInterim=transcript;
+    status.textContent="🎤 MENDENGAR: "+transcript;
    }
   }
  };
 
  speech.onerror=e=>{
-  status.textContent="🎤 Mikrofon: "+e.error;
-  if(e.error==="not-allowed"||e.error==="service-not-allowed"){
+  status.textContent="🎤 RALAT MIKROFON: "+e.error;
+  if(e.error==="not-allowed"||
+     e.error==="service-not-allowed"){
    running=false;
   }
  };
@@ -162,17 +172,17 @@ function startVoice(){
     if(running){
      try{speech.start()}catch(e){}
     }
-   },500);
+   },400);
   }
  };
 
- try{
-  speech.start();
- }catch(e){
-  status.textContent="❌ Gagal mengaktifkan mikrofon.";
+ try{speech.start()}
+ catch(e){
+  status.textContent="❌ Gagal mengaktifkan mikrofon";
  }
 }
 
+// PENGESANAN ZIKIR
 function processVoice(raw){
  if(!running)return;
 
@@ -180,7 +190,12 @@ function processVoice(raw){
  .replace(/[.,!?]/g," ")
  .replace(/\s+/g," ").trim();
 
- // ALLAHU AKBAR = BERHENTI
+ // NORMALISASI SEBUTAN
+ t=t.replace(/\bsubhan\s+allah\b/g,"subhanallah");
+ t=t.replace(/\bmasya\s+allah\b/g,"masyaallah");
+ t=t.replace(/\bmasha\s+allah\b/g,"masyaallah");
+
+ // BERHENTI
  if(/\ballahu\s+akbar\b/.test(t)){
   moveDir=0;
   moveUntil=0;
@@ -190,50 +205,69 @@ function processVoice(raw){
   return;
  }
 
- // ALHAMDULILLAH = TEMBAK
+ // TEMBAK
  let tembak=(t.match(/\balhamdulillah\b/g)||[]).length;
 
  if(tembak){
   for(let i=0;i<tembak;i++){
    bullets.push({
-    x:player.x+player.w,
-    y:player.y+20,
-    vx:10
+    x:player.facing===1?player.x+player.w:player.x,
+    y:player.y+35,
+    vx:player.facing*11
    });
   }
   status.textContent="💥 ALHAMDULILLAH — TEMBAK!";
  }
 
- // SUBHANALLAH = MAJU
- let maju=(t.match(/\bsubhan\s*allah\b|\bsubhanallah\b/g)||[]).length;
+ // MAJU
+ let maju=(t.match(/\bsubhanallah\b/g)||[]).length;
 
  if(maju){
   let now=Date.now();
-  combo=(moveDir===1&&now-lastMove<1800)?combo+maju:maju;
+
+  combo=(moveDir===1&&now-lastMove<2000)?
+  combo+maju:maju;
+
   moveDir=1;
-  moveUntil=now+maju*700;
+  player.facing=1;
+  moveUntil=now+maju*800;
   lastMove=now;
-  status.textContent="➡️ MAJU ×"+maju;
+
+  status.textContent="➡️ MAJU ×"+maju+
+  " | KELAJUAN "+Math.min(10,3+combo).toFixed(1);
  }
 
- // MASYAALLAH = UNDUR
- let undur=(t.match(/\b(?:masya|masha)\s*allah\b/g)||[]).length;
+ // UNDUR
+ let undur=(t.match(/\bmasyaallah\b/g)||[]).length;
 
  if(undur){
   let now=Date.now();
-  combo=(moveDir===-1&&now-lastMove<1800)?combo+undur:undur;
+
+  combo=(moveDir===-1&&now-lastMove<2000)?
+  combo+undur:undur;
+
   moveDir=-1;
-  moveUntil=now+undur*700;
+  player.facing=-1;
+  moveUntil=now+undur*800;
   lastMove=now;
-  status.textContent="⬅️ UNDUR ×"+undur;
+
+  status.textContent="⬅️ UNDUR ×"+undur+
+  " | KELAJUAN "+Math.min(10,3+combo).toFixed(1);
  }
 
- // ALLAH ALLAH = LOMPAT TINGGI
- // Elakkan mengesan Allahu Akbar
- let allah=(t.match(/\ballah\b/g)||[]).length;
+ // LOMPAT
+ // Buang frasa zikir yang mengandungi perkataan Allah
+ // supaya tidak tersalah baca sebagai arahan lompat.
+ let clean=t
+ .replace(/\ballahu\s+akbar\b/g,"")
+ .replace(/\bsubhanallah\b/g,"")
+ .replace(/\bmasyaallah\b/g,"")
+ .replace(/\balhamdulillah\b/g,"");
+
+ let allah=(clean.match(/\ballah\b/g)||[]).length;
 
  if(allah>=2){
-  player.vy=-19;
+  player.vy=-20;
   player.ground=false;
   status.textContent="🚀 LOMPAT TINGGI!";
  }else if(allah===1){
@@ -245,6 +279,7 @@ function processVoice(raw){
  }
 }
 
+// PERLANGGARAN
 function hit(a,b){
  return a.x<b.x+b.w&&
  a.x+a.w>b.x&&
@@ -252,15 +287,19 @@ function hit(a,b){
  a.y+a.h>b.y;
 }
 
+// KEMASKINI GAME
 function update(){
+
  if(Date.now()>moveUntil){
   moveDir=0;
   combo=0;
  }
 
- let speed=Math.min(10,3+combo*1.2);
+ let speed=Math.min(10,3+combo);
  player.vx=moveDir*speed;
  player.x+=player.vx;
+
+ if(Math.abs(player.vx)>0)player.walk+=0.22;
 
  player.vy+=0.65;
  player.y+=player.vy;
@@ -268,21 +307,25 @@ function update(){
 
  for(let p of platforms){
   if(player.x+player.w>p.x&&
-  player.x<p.x+p.w&&
-  player.y+player.h>=p.y&&
-  player.y+player.h<=p.y+22&&
-  player.vy>=0){
+     player.x<p.x+p.w&&
+     player.y+player.h>=p.y&&
+     player.y+player.h<=p.y+22&&
+     player.vy>=0){
    player.y=p.y-player.h;
    player.vy=0;
    player.ground=true;
   }
  }
 
+ // MUSUH
  for(let e of enemies){
   if(!e.alive)continue;
 
-  if(hit(player,{x:e.x,y:e.y,w:43,h:43})){
-   if(player.vy>1&&player.y+player.h<e.y+27){
+  if(hit(
+   {x:player.x+5,y:player.y+8,w:player.w-10,h:player.h-8},
+   {x:e.x,y:e.y,w:48,h:45}
+  )){
+   if(player.vy>1&&player.y+player.h<e.y+30){
     e.alive=false;
     player.vy=-9;
     score+=10;
@@ -293,11 +336,15 @@ function update(){
   }
  }
 
+ // PELURU
  for(let b of bullets){
   b.x+=b.vx;
 
   for(let e of enemies){
-   if(e.alive&&hit(b,{x:e.x,y:e.y,w:43,h:43})){
+   if(e.alive&&hit(
+    {x:b.x,y:b.y,w:12,h:10},
+    {x:e.x,y:e.y,w:48,h:45}
+   )){
     e.alive=false;
     b.x=99999;
     score+=10;
@@ -305,7 +352,7 @@ function update(){
   }
  }
 
- bullets=bullets.filter(b=>b.x<camera+W+100);
+ bullets=bullets.filter(b=>b.x>camera-100&&b.x<camera+W+100);
 
  if(player.y>H+100){
   player.x=Math.max(50,player.x-150);
@@ -314,18 +361,196 @@ function update(){
  }
 
  camera=Math.max(0,player.x-W*.35);
+
  document.getElementById("score").textContent=score;
 }
 
+// LUKIS MANUSIA LENGKAP
+function drawHuman(){
+ let x=player.x-camera;
+ let y=player.y;
+ let walk=Math.sin(player.walk)*9;
+ let jump=player.ground?0:3;
+
+ ctx.save();
+ ctx.translate(x+player.w/2,y);
+ ctx.scale(player.facing,1);
+
+ // Bayang
+ ctx.fillStyle="#315b3e";
+ ctx.beginPath();
+ ctx.ellipse(0,player.h+2,23,5,0,0,Math.PI*2);
+ ctx.fill();
+
+ // Kaki belakang
+ ctx.strokeStyle="#243a70";
+ ctx.lineWidth=9;
+ ctx.lineCap="round";
+ ctx.beginPath();
+ ctx.moveTo(-7,51);
+ ctx.lineTo(-9-walk,69);
+ ctx.stroke();
+
+ // Kasut belakang
+ ctx.strokeStyle="#422719";
+ ctx.lineWidth=10;
+ ctx.beginPath();
+ ctx.moveTo(-9-walk,69);
+ ctx.lineTo(-18-walk,71);
+ ctx.stroke();
+
+ // Kaki depan
+ ctx.strokeStyle="#243a70";
+ ctx.lineWidth=9;
+ ctx.beginPath();
+ ctx.moveTo(7,51);
+ ctx.lineTo(9+walk,69);
+ ctx.stroke();
+
+ // Kasut depan
+ ctx.strokeStyle="#422719";
+ ctx.lineWidth=10;
+ ctx.beginPath();
+ ctx.moveTo(9+walk,69);
+ ctx.lineTo(19+walk,71);
+ ctx.stroke();
+
+ // Badan / baju
+ ctx.fillStyle="#e63e2f";
+ ctx.beginPath();
+ ctx.roundRect(-14,24,28,30,7);
+ ctx.fill();
+
+ // Leher
+ ctx.fillStyle="#e8a46c";
+ ctx.fillRect(-5,19,10,8);
+
+ // Tangan belakang
+ ctx.strokeStyle="#e8a46c";
+ ctx.lineWidth=8;
+ ctx.beginPath();
+ ctx.moveTo(-12,30);
+ ctx.lineTo(-19+walk,44);
+ ctx.stroke();
+
+ // Tangan depan
+ ctx.beginPath();
+ ctx.moveTo(12,30);
+ ctx.lineTo(20-walk,43);
+ ctx.stroke();
+
+ // Kepala
+ ctx.fillStyle="#e8a46c";
+ ctx.beginPath();
+ ctx.arc(0,12,13,0,Math.PI*2);
+ ctx.fill();
+
+ // Rambut
+ ctx.fillStyle="#39251b";
+ ctx.beginPath();
+ ctx.arc(0,7,13,Math.PI,Math.PI*2);
+ ctx.fill();
+
+ // Mata
+ ctx.fillStyle="#211a15";
+ ctx.beginPath();
+ ctx.arc(5,12,1.8,0,Math.PI*2);
+ ctx.fill();
+
+ // Senyuman
+ ctx.strokeStyle="#713d2c";
+ ctx.lineWidth=1.5;
+ ctx.beginPath();
+ ctx.arc(5,16,4,0.1,1.3);
+ ctx.stroke();
+
+ // Topi
+ ctx.fillStyle="#e9c52e";
+ ctx.beginPath();
+ ctx.arc(0,5,14,Math.PI,Math.PI*2);
+ ctx.fill();
+ ctx.fillRect(-16,4,32,4);
+
+ ctx.restore();
+}
+
+// LUKIS DURIAN
+function drawDurian(x,y){
+ ctx.save();
+ ctx.translate(x,y);
+
+ // Bayang
+ ctx.fillStyle="#365c29";
+ ctx.beginPath();
+ ctx.ellipse(24,45,26,5,0,0,Math.PI*2);
+ ctx.fill();
+
+ // Duri
+ ctx.fillStyle="#538b22";
+ for(let i=0;i<12;i++){
+  let a=i*Math.PI/6;
+  let px=24+Math.cos(a)*20;
+  let py=22+Math.sin(a)*18;
+
+  ctx.beginPath();
+  ctx.moveTo(px-5,py-3);
+  ctx.lineTo(px,py-13);
+  ctx.lineTo(px+5,py-3);
+  ctx.fill();
+ }
+
+ // Isi kulit durian
+ ctx.fillStyle="#80ad26";
+ ctx.beginPath();
+ ctx.ellipse(24,23,23,20,0,0,Math.PI*2);
+ ctx.fill();
+
+ // Corak durian
+ ctx.strokeStyle="#426d1d";
+ ctx.lineWidth=2;
+
+ for(let i=0;i<7;i++){
+  let px=9+i*5;
+  ctx.beginPath();
+  ctx.moveTo(px,10);
+  ctx.lineTo(px-3,22);
+  ctx.lineTo(px,32);
+  ctx.stroke();
+ }
+
+ // Tangkai
+ ctx.fillStyle="#6e4b22";
+ ctx.fillRect(21,0,6,7);
+
+ // Mata
+ ctx.fillStyle="#172b15";
+ ctx.beginPath();
+ ctx.arc(17,21,2.5,0,Math.PI*2);
+ ctx.arc(31,21,2.5,0,Math.PI*2);
+ ctx.fill();
+
+ // Mulut
+ ctx.strokeStyle="#263c17";
+ ctx.lineWidth=2;
+ ctx.beginPath();
+ ctx.arc(24,28,5,0,Math.PI);
+ ctx.stroke();
+
+ ctx.restore();
+}
+
+// LUKIS DUNIA
 function draw(){
  ctx.fillStyle="#79d3f2";
  ctx.fillRect(0,0,W,H);
 
- // Awan
+ // Langit dan awan
  ctx.fillStyle="white";
+
  for(let i=0;i<10;i++){
   let x=((i*260-camera*.25)%(W+260)+W+260)%(W+260);
   let y=65+(i%3)*55;
+
   ctx.beginPath();
   ctx.arc(x,y,23,0,7);
   ctx.arc(x+28,y,28,0,7);
@@ -335,6 +560,7 @@ function draw(){
 
  // Bukit
  ctx.fillStyle="#48a56c";
+
  for(let i=0;i<9;i++){
   let x=i*300-camera*.5;
   ctx.beginPath();
@@ -345,24 +571,21 @@ function draw(){
  // Platform
  for(let p of platforms){
   let x=p.x-camera;
+
   ctx.fillStyle="#9b5c2c";
   ctx.fillRect(x,p.y,p.w,H-p.y);
+
   ctx.fillStyle="#46b84e";
   ctx.fillRect(x,p.y,p.w,12);
  }
 
- // Musuh durian
+ // Durian
  for(let e of enemies){
   if(!e.alive)continue;
-  let x=e.x-camera;
-  ctx.font="42px Arial";
-  ctx.fillText("🌰",x,e.y+40);
-  ctx.font="12px Arial";
-  ctx.fillStyle="#173c20";
-  ctx.fillText("DURIAN",x,e.y+52);
+  drawDurian(e.x-camera,e.y);
  }
 
- // Tembakan
+ // Peluru
  ctx.fillStyle="#ffdf35";
  for(let b of bullets){
   ctx.beginPath();
@@ -370,13 +593,12 @@ function draw(){
   ctx.fill();
  }
 
- // Watak
- ctx.font="43px Arial";
- ctx.fillText("🧑",player.x-camera,player.y+43);
+ // Manusia
+ drawHuman();
 
- ctx.fillStyle="#fff";
+ ctx.fillStyle="white";
  ctx.font="12px Arial";
- ctx.fillText("DUNIA SUPER DURIAN",20,H-15);
+ ctx.fillText("SUPER DURIAN ADVENTURE",15,H-15);
 }
 
 function loop(){
