@@ -1,0 +1,8477 @@
+
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#102b35">
+<title>SUPER DURIAN</title>
+
+<style>
+:root {
+ --dark:#102b35;
+ --green:#1b583b;
+ --lime:#d5f26f;
+ --gold:#ffc94a;
+ --white:#fff;
+ --glass:rgba(255,255,255,.20);
+}
+* {
+ box-sizing:border-box;
+ margin:0;
+ padding:0;
+ -webkit-tap-highlight-color:transparent;
+ user-select:none;
+}
+html,body {
+ width:100%;
+ height:100%;
+ overflow:hidden;
+ background:var(--dark);
+ color:white;
+ font-family:Arial,Helvetica,sans-serif;
+ touch-action:none;
+}
+button {
+ font-family:inherit;
+ cursor:pointer;
+ touch-action:none;
+}
+#game {
+ position:absolute;
+ inset:0;
+ width:100%;
+ height:100%;
+ display:block;
+}
+#interface {
+ position:absolute;
+ inset:0;
+ pointer-events:none;
+}
+.hud {
+ position:absolute;
+ top:10px;
+ left:10px;
+ right:10px;
+ display:flex;
+ justify-content:space-between;
+ align-items:flex-start;
+ gap:6px;
+}
+.hud-panel {
+ min-width:65px;
+ padding:9px 12px;
+ border-radius:13px;
+ border:1px solid #ffffff55;
+ background:#102b35dd;
+ box-shadow:0 3px 10px #0003;
+ font-size:14px;
+ font-weight:900;
+ text-align:center;
+}
+.hud-panel small {
+ display:block;
+ color:#cce9d0;
+ font-size:10px;
+ margin-bottom:3px;
+}
+#controls {
+ position:absolute;
+ left:0;
+ right:0;
+ bottom:0;
+ height:175px;
+ pointer-events:none;
+}
+#joystick {
+ position:absolute;
+ left:20px;
+ bottom:17px;
+ width:125px;
+ height:125px;
+ border-radius:50%;
+ border:3px solid rgba(255,255,255,.48);
+ background:rgba(255,255,255,.13);
+ box-shadow:inset 0 0 15px #ffffff20;
+ pointer-events:auto;
+ touch-action:none;
+}
+#stick {
+ position:absolute;
+ left:50%;
+ top:50%;
+ width:52px;
+ height:52px;
+ transform:translate(-50%,-50%);
+ border-radius:50%;
+ border:2px solid rgba(255,255,255,.8);
+ background:rgba(255,255,255,.48);
+ box-shadow:0 3px 12px #0004;
+}
+#actionButtons {
+ position:absolute;
+ right:16px;
+ bottom:23px;
+ display:flex;
+ gap:12px;
+ pointer-events:auto;
+}
+.control-button {
+ width:68px;
+ height:68px;
+ border-radius:50%;
+ border:2px solid #ffffff99;
+ background:rgba(255,255,255,.23);
+ color:white;
+ font-size:12px;
+ font-weight:900;
+ box-shadow:0 3px 12px #0004;
+}
+.control-button:active {
+ background:rgba(213,242,111,.65);
+ transform:scale(.95);
+}
+#menu {
+ position:absolute;
+ inset:0;
+ z-index:20;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ padding:18px;
+ background:linear-gradient(135deg,#102b35ee,#071a20f5);
+}
+.menu-card {
+ width:min(440px,100%);
+ border:2px solid #d5f26f;
+ border-radius:25px;
+ background:linear-gradient(145deg,#24573d,#102e29);
+ padding:25px 18px;
+ text-align:center;
+ box-shadow:0 12px 35px #0007;
+}
+.game-logo {
+ font-size:clamp(38px,10vw,64px);
+ font-weight:1000;
+ line-height:.95;
+ color:#e5ff91;
+ text-shadow:3px 5px #254c26;
+ letter-spacing:-2px;
+}
+.menu-description {
+ margin:18px 0;
+ line-height:1.6;
+ font-size:14px;
+ color:#e1f4df;
+}
+.primary-button {
+ display:block;
+ width:100%;
+ border:0;
+ border-radius:14px;
+ padding:16px;
+ margin-top:10px;
+ background:#d5f26f;
+ color:#173a22;
+ font-weight:1000;
+ font-size:18px;
+}
+.secondary-button {
+ display:block;
+ width:100%;
+ border:1px solid #ffffff66;
+ border-radius:14px;
+ padding:13px;
+ margin-top:10px;
+ background:#ffffff15;
+ color:white;
+ font-weight:bold;
+}
+#notification {
+ position:absolute;
+ z-index:12;
+ top:23%;
+ left:50%;
+ transform:translateX(-50%);
+ max-width:90%;
+ width:max-content;
+ padding:12px 20px;
+ border-radius:14px;
+ background:#102b35ee;
+ border:2px solid var(--lime);
+ color:white;
+ font-weight:900;
+ text-align:center;
+ display:none;
+}
+#bonusLayer {
+ position:absolute;
+ z-index:30;
+ inset:0;
+ display:none;
+ align-items:center;
+ justify-content:center;
+ padding:18px;
+ background:#000b;
+ pointer-events:auto;
+}
+#bonusCard {
+ width:min(380px,100%);
+ padding:22px;
+ border-radius:22px;
+ background:#174333;
+ border:3px solid var(--lime);
+ text-align:center;
+}
+#bonusCard h2 {
+ color:var(--lime);
+ margin-bottom:12px;
+}
+#bonusCard p {
+ font-size:14px;
+ line-height:1.5;
+ margin:8px 0;
+}
+#bonusCount {
+ font-size:32px;
+ color:var(--lime);
+ font-weight:1000;
+ margin:12px;
+}
+#bonusProgress {
+ height:16px;
+ border-radius:20px;
+ overflow:hidden;
+ background:#061d16;
+ border:1px solid #ffffff66;
+}
+#bonusBar {
+ height:100%;
+ width:0;
+ background:linear-gradient(90deg,#8fc83d,#eaff88);
+ transition:width .15s;
+}
+#holdBonus {
+ width:100%;
+ border:2px solid white;
+ border-radius:13px;
+ padding:17px;
+ margin-top:15px;
+ background:var(--lime);
+ color:#183b20;
+ font-weight:1000;
+ font-size:16px;
+}
+#bonusStatus {
+ margin-top:12px;
+ min-height:35px;
+ color:#e3f2d9;
+ font-size:12px;
+}
+#closeBonus {
+ border:1px solid #ffffff66;
+ border-radius:10px;
+ padding:10px 20px;
+ margin-top:10px;
+ background:#ffffff17;
+ color:white;
+}
+.hidden {
+ display:none!important;
+}
+@media(max-height:500px) {
+ #controls {
+  transform:scale(.78);
+  transform-origin:bottom left;
+ }
+ #actionButtons {
+  transform:scale(.9);
+  transform-origin:bottom right;
+ }
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="interface">
+
+ <div class="hud">
+  <div class="hud-panel">
+   <small>MARKAH</small>
+   💎 <span id="score">0</span>
+  </div>
+
+  <div class="hud-panel">
+   <small>NYAWA</small>
+   ❤️ <span id="lives">3</span>
+  </div>
+
+  <div class="hud-panel">
+   <small>BONUS</small>
+   📦 <span id="bonusTotal">0</span>/20
+  </div>
+
+  <div class="hud-panel">
+   <small>MISI</small>
+   <span id="mission">1/20</span>
+  </div>
+ </div>
+
+ <div id="notification"></div>
+
+ <div id="controls">
+  <div id="joystick">
+   <div id="stick"></div>
+  </div>
+
+  <div id="actionButtons">
+   <button class="control-button" id="jumpButton">
+    LOMPAT
+   </button>
+
+   <button class="control-button" id="attackButton">
+    SERANG
+   </button>
+  </div>
+ </div>
+
+</div>
+
+<div id="menu">
+ <div class="menu-card">
+  <div class="game-logo">
+   SUPER<br>DURIAN
+  </div>
+
+  <div class="menu-description">
+   Pengembaraan seorang wira menentang durian berduri.
+   Kumpulkan permata, selesaikan misi dan buka 20 kotak bonus.
+  </div>
+
+  <button class="primary-button" id="startButton">
+   MULA PERMAINAN
+  </button>
+
+  <button class="secondary-button" id="instructionsButton">
+   CARA BERMAIN
+  </button>
+
+  <p style="font-size:11px;margin-top:14px;color:#c9dfc7">
+   SUPER DURIAN • KP2027
+  </p>
+ </div>
+</div>
+
+<div id="bonusLayer">
+ <div id="bonusCard">
+  <h2>📦 KOTAK BONUS</h2>
+
+  <p>
+   Sebut <b>SUBHANALLAH</b> sebanyak 10 kali.
+  </p>
+
+  <p>
+   Klik dan tahan sekali sepanjang bacaan.
+  </p>
+
+  <div id="bonusCount">0 / 10</div>
+
+  <div id="bonusProgress">
+   <div id="bonusBar"></div>
+  </div>
+
+  <button id="holdBonus">
+   KLIK DAN TAHAN
+  </button>
+
+  <div id="bonusStatus">
+   Bersedia untuk membuka kotak bonus.
+  </div>
+
+  <button id="closeBonus">
+   TUTUP
+  </button>
+ </div>
+</div>
+
+<script>
+"use strict";
+
+/* =========================================
+   01. KONFIGURASI PERMAINAN
+========================================= */
+
+const CONFIG = {
+ name:"SUPER DURIAN",
+ totalMissions:20,
+ totalBonus:20,
+ gravity:0.58,
+ playerSpeed:4.2,
+ jumpPower:13.5,
+ highJumpPower:19,
+ maximumLives:3,
+ worldWidth:6200,
+ cameraSmooth:0.12,
+ soundEnabled:true,
+ debug:false
+};
+
+/* =========================================
+   02. RUJUKAN ELEMEN
+========================================= */
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const UI = {
+ menu:document.getElementById("menu"),
+ start:document.getElementById("startButton"),
+ instructions:document.getElementById("instructionsButton"),
+ score:document.getElementById("score"),
+ lives:document.getElementById("lives"),
+ bonus:document.getElementById("bonusTotal"),
+ mission:document.getElementById("mission"),
+ notification:document.getElementById("notification"),
+ joystick:document.getElementById("joystick"),
+ stick:document.getElementById("stick"),
+ jump:document.getElementById("jumpButton"),
+ attack:document.getElementById("attackButton"),
+ bonusLayer:document.getElementById("bonusLayer"),
+ bonusCount:document.getElementById("bonusCount"),
+ bonusBar:document.getElementById("bonusBar"),
+ bonusStatus:document.getElementById("bonusStatus"),
+ holdBonus:document.getElementById("holdBonus"),
+ closeBonus:document.getElementById("closeBonus")
+};
+
+/* =========================================
+   03. DIMENSI SKRIN
+========================================= */
+
+let SCREEN = {
+ width:window.innerWidth,
+ height:window.innerHeight,
+ ratio:Math.min(window.devicePixelRatio||1,2)
+};
+
+function resizeCanvas(){
+ SCREEN.width=window.innerWidth;
+ SCREEN.height=window.innerHeight;
+ SCREEN.ratio=Math.min(window.devicePixelRatio||1,2);
+
+ canvas.width=SCREEN.width*SCREEN.ratio;
+ canvas.height=SCREEN.height*SCREEN.ratio;
+
+ canvas.style.width=SCREEN.width+"px";
+ canvas.style.height=SCREEN.height+"px";
+
+ ctx.setTransform(
+  SCREEN.ratio,0,0,SCREEN.ratio,0,0
+ );
+
+ if(gameState==="menu"){
+  drawMenuPreview();
+ }
+}
+
+window.addEventListener("resize",resizeCanvas);
+
+/* =========================================
+   04. KEADAAN PERMAINAN
+========================================= */
+
+let gameState="menu";
+let gameStarted=false;
+let gamePaused=false;
+
+let gameClock=0;
+let previousFrame=0;
+let frameNumber=0;
+
+let score=0;
+let lives=CONFIG.maximumLives;
+let openedBonuses=0;
+let currentMission=1;
+
+let camera={
+ x:0,
+ y:0,
+ targetX:0,
+ targetY:0
+};
+
+let world={
+ width:CONFIG.worldWidth,
+ groundY:SCREEN.height-65,
+ backgroundSeed:27
+};
+
+/* =========================================
+   05. INPUT KEYBOARD
+========================================= */
+
+const keyboard={
+ left:false,
+ right:false,
+ up:false,
+ down:false,
+ jump:false,
+ attack:false
+};
+
+window.addEventListener("keydown",function(e){
+ if(e.key==="ArrowLeft"||e.key==="a"){
+  keyboard.left=true;
+  e.preventDefault();
+ }
+
+ if(e.key==="ArrowRight"||e.key==="d"){
+  keyboard.right=true;
+  e.preventDefault();
+ }
+
+ if(e.key==="ArrowUp"||e.key===" "){
+  if(!keyboard.jump){
+   keyboard.jump=true;
+   playerJump();
+  }
+  e.preventDefault();
+ }
+
+ if(e.key==="x"||e.key==="X"){
+  if(!keyboard.attack){
+   keyboard.attack=true;
+   playerAttack();
+  }
+ }
+});
+
+window.addEventListener("keyup",function(e){
+ if(e.key==="ArrowLeft"||e.key==="a")keyboard.left=false;
+ if(e.key==="ArrowRight"||e.key==="d")keyboard.right=false;
+ if(e.key==="ArrowUp"||e.key===" ")keyboard.jump=false;
+ if(e.key==="x"||e.key==="X")keyboard.attack=false;
+});
+
+/* =========================================
+   06. JOYSTICK SENTUHAN
+========================================= */
+
+const joystick={
+ active:false,
+ pointerId:null,
+ x:0,
+ y:0,
+ magnitude:0,
+ radius:43
+};
+
+function resetJoystick(){
+ joystick.active=false;
+ joystick.pointerId=null;
+ joystick.x=0;
+ joystick.y=0;
+ joystick.magnitude=0;
+
+ UI.stick.style.left="50%";
+ UI.stick.style.top="50%";
+}
+
+function updateJoystick(e){
+ const rect=UI.joystick.getBoundingClientRect();
+
+ const centerX=rect.left+rect.width/2;
+ const centerY=rect.top+rect.height/2;
+
+ let dx=e.clientX-centerX;
+ let dy=e.clientY-centerY;
+
+ const distance=Math.hypot(dx,dy);
+ const max=joystick.radius;
+
+ if(distance>max){
+  dx=dx/distance*max;
+  dy=dy/distance*max;
+ }
+
+ joystick.x=dx/max;
+ joystick.y=dy/max;
+ joystick.magnitude=Math.min(distance/max,1);
+
+ UI.stick.style.left=
+  "calc(50% + "+dx+"px)";
+
+ UI.stick.style.top=
+  "calc(50% + "+dy+"px)";
+}
+
+UI.joystick.addEventListener("pointerdown",function(e){
+ e.preventDefault();
+
+ joystick.active=true;
+ joystick.pointerId=e.pointerId;
+
+ UI.joystick.setPointerCapture(e.pointerId);
+
+ updateJoystick(e);
+});
+
+UI.joystick.addEventListener("pointermove",function(e){
+ if(!joystick.active)return;
+ if(e.pointerId!==joystick.pointerId)return;
+
+ updateJoystick(e);
+});
+
+UI.joystick.addEventListener("pointerup",function(e){
+ if(e.pointerId===joystick.pointerId){
+  resetJoystick();
+ }
+});
+
+UI.joystick.addEventListener("pointercancel",resetJoystick);
+
+/* =========================================
+   07. INPUT PERGERAKAN
+========================================= */
+
+function getHorizontalInput(){
+ let direction=0;
+
+ if(keyboard.left)direction-=1;
+ if(keyboard.right)direction+=1;
+
+ if(joystick.active){
+  if(joystick.x<-.18)direction=-1;
+  else if(joystick.x>.18)direction=1;
+ }
+
+ return direction;
+}
+
+function getVerticalInput(){
+ if(!joystick.active)return 0;
+ return joystick.y;
+}
+
+/* =========================================
+   08. DATA WATAK
+========================================= */
+
+const player={
+ x:100,
+ y:300,
+ width:40,
+ height:78,
+
+ velocityX:0,
+ velocityY:0,
+
+ direction:1,
+ speed:CONFIG.playerSpeed,
+
+ grounded:false,
+ jumping:false,
+ airJumpAvailable:true,
+
+ health:100,
+ invincible:0,
+
+ animation:{
+  state:"idle",
+  frame:0,
+  timer:0,
+  walkSpeed:0.15,
+  armAngle:0,
+  legAngle:0,
+  bodyBounce:0
+ },
+
+ attack:{
+  active:false,
+  timer:0,
+  cooldown:0
+ },
+
+ equipment:{
+  hat:true,
+  weapon:true
+ }
+};
+
+/* =========================================
+   09. FIZIK WATAK
+========================================= */
+
+function playerJump(){
+ if(gameState!=="playing")return;
+ if(UI.bonusLayer.style.display==="flex")return;
+
+ if(player.grounded){
+  player.velocityY=-CONFIG.jumpPower;
+  player.grounded=false;
+  player.jumping=true;
+  player.animation.state="jump";
+  return;
+ }
+
+ if(player.airJumpAvailable){
+  player.velocityY=-CONFIG.highJumpPower;
+  player.airJumpAvailable=false;
+  player.animation.state="jump";
+ }
+}
+
+function playerAttack(){
+ if(gameState!=="playing")return;
+ if(player.attack.cooldown>0)return;
+
+ player.attack.active=true;
+ player.attack.timer=14;
+ player.attack.cooldown=25;
+}
+
+/* =========================================
+   10. KAWALAN BUTANG
+========================================= */
+
+UI.jump.addEventListener("pointerdown",function(e){
+ e.preventDefault();
+ playerJump();
+});
+
+UI.attack.addEventListener("pointerdown",function(e){
+ e.preventDefault();
+ playerAttack();
+});
+
+/* =========================================
+   11. DATA ANIMASI
+========================================= */
+
+function updatePlayerAnimation(){
+ const a=player.animation;
+
+ if(!player.grounded){
+  a.state="jump";
+ }else if(Math.abs(player.velocityX)>.2){
+  a.state="walk";
+ }else{
+  a.state="idle";
+ }
+
+ if(a.state==="walk"){
+  a.timer+=a.walkSpeed;
+  a.frame=Math.floor(a.timer)%8;
+  a.legAngle=Math.sin(a.timer)*.65;
+  a.armAngle=Math.sin(a.timer+Math.PI)*.5;
+  a.bodyBounce=Math.abs(Math.sin(a.timer*2))*2;
+ }else if(a.state==="jump"){
+  a.legAngle=.25;
+  a.armAngle=-.5;
+  a.bodyBounce=0;
+ }else{
+  a.legAngle=0;
+  a.armAngle=0;
+  a.bodyBounce=0;
+ }
+}
+
+/* =========================================
+   12. LUKIS WATAK MANUSIA
+========================================= */
+
+function drawPlayer(){
+ const x=player.x-camera.x;
+ const y=player.y;
+
+ const a=player.animation;
+
+ ctx.save();
+
+ ctx.translate(
+  x+player.width/2,
+  y+a.bodyBounce
+ );
+
+ ctx.scale(player.direction,1);
+
+ if(player.invincible>0 && Math.floor(gameClock/80)%2===0){
+  ctx.globalAlpha=.4;
+ }
+
+ // Bayang
+ ctx.fillStyle="rgba(0,0,0,.22)";
+ ctx.beginPath();
+ ctx.ellipse(0,player.height+2,21,5,0,0,Math.PI*2);
+ ctx.fill();
+
+ // Kaki kiri
+ ctx.save();
+ ctx.translate(-7,49);
+ ctx.rotate(a.legAngle);
+
+ ctx.fillStyle="#263b57";
+ ctx.fillRect(-5,0,10,22);
+
+ ctx.fillStyle="#412c22";
+ ctx.fillRect(-7,19,15,7);
+
+ ctx.restore();
+
+ // Kaki kanan
+ ctx.save();
+ ctx.translate(7,49);
+ ctx.rotate(-a.legAngle);
+
+ ctx.fillStyle="#263b57";
+ ctx.fillRect(-5,0,10,22);
+
+ ctx.fillStyle="#412c22";
+ ctx.fillRect(-5,19,15,7);
+
+ ctx.restore();
+
+ // Badan
+ ctx.fillStyle="#1769aa";
+ ctx.fillRect(-15,21,30,31);
+
+ // Corak baju
+ ctx.fillStyle="#f3f4ee";
+ ctx.fillRect(-9,24,18,24);
+
+ ctx.fillStyle="#d7e5f4";
+ ctx.fillRect(-3,25,6,22);
+
+ // Tangan kiri
+ ctx.save();
+ ctx.translate(-12,27);
+ ctx.rotate(-a.armAngle);
+
+ ctx.fillStyle="#d99b6d";
+ ctx.fillRect(-4,0,8,23);
+
+ ctx.restore();
+
+ // Tangan kanan
+ ctx.save();
+ ctx.translate(12,27);
+ ctx.rotate(a.armAngle);
+
+ ctx.fillStyle="#d99b6d";
+ ctx.fillRect(-4,0,8,23);
+
+ ctx.restore();
+
+ // Leher
+ ctx.fillStyle="#d99b6d";
+ ctx.fillRect(-5,15,10,10);
+
+ // Kepala
+ ctx.fillStyle="#d99b6d";
+ ctx.beginPath();
+ ctx.arc(0,8,13,0,Math.PI*2);
+ ctx.fill();
+
+ // Rambut
+ ctx.fillStyle="#30231c";
+ ctx.beginPath();
+ ctx.arc(0,3,13,Math.PI,Math.PI*2);
+ ctx.fill();
+
+ ctx.fillRect(-13,2,26,6);
+
+ // Mata
+ ctx.fillStyle="#211b17";
+ ctx.beginPath();
+ ctx.arc(5,9,1.6,0,Math.PI*2);
+ ctx.fill();
+
+ // Topi
+ if(player.equipment.hat){
+  ctx.fillStyle="#245b35";
+  ctx.fillRect(-15,-6,30,5);
+  ctx.fillRect(-10,-13,20,8);
+ }
+
+ // Serangan
+ if(player.attack.active){
+  ctx.strokeStyle="#fff0a2";
+  ctx.lineWidth=5;
+  ctx.beginPath();
+  ctx.arc(28,35,20,-1.2,1.2);
+  ctx.stroke();
+ }
+
+ ctx.restore();
+}
+
+/* =========================================
+   13. PLATFORM DATA
+========================================= */
+
+let platforms=[];
+
+function createPlatforms(){
+ platforms=[];
+
+ const groundY=SCREEN.height-65;
+
+ platforms.push({
+  x:0,
+  y:groundY,
+  width:CONFIG.worldWidth,
+  height:65,
+  type:"ground"
+ });
+
+ const data=[
+  [300,170,170],
+  [620,245,180],
+  [950,180,180],
+  [1300,260,190],
+  [1650,190,200],
+  [2000,275,190],
+  [2350,190,200],
+  [2700,270,190],
+  [3050,190,200],
+  [3400,265,190],
+  [3750,190,200],
+  [4100,270,190],
+  [4450,190,200],
+  [4800,270,190],
+  [5200,190,200]
+ ];
+
+ for(const item of data){
+  platforms.push({
+   x:item[0],
+   y:groundY-item[1],
+   width:item[2],
+   height:18,
+   type:"platform"
+  });
+ }
+}
+
+/* =========================================
+   14. LUKIS PLATFORM
+========================================= */
+
+function drawPlatforms(){
+ for(const p of platforms){
+  const x=p.x-camera.x;
+
+  if(x+p.width<0||x>SCREEN.width)continue;
+
+  if(p.type==="ground"){
+   ctx.fillStyle="#795331";
+   ctx.fillRect(x,p.y,p.width,p.height);
+
+   ctx.fillStyle="#55a847";
+   ctx.fillRect(x,p.y,p.width,9);
+
+   ctx.fillStyle="#a17a4c";
+
+   for(let i=0;i<p.width;i+=35){
+    ctx.fillRect(x+i,p.y+20,15,3);
+   }
+
+  }else{
+   ctx.fillStyle="#80532e";
+   ctx.fillRect(x,p.y,p.width,p.height);
+
+   ctx.fillStyle="#55a847";
+   ctx.fillRect(x,p.y,p.width,7);
+
+   ctx.strokeStyle="#57391f";
+   ctx.lineWidth=2;
+   ctx.strokeRect(x,p.y,p.width,p.height);
+  }
+ }
+}
+
+/* =========================================
+   15. LATAR BELAKANG
+========================================= */
+
+function drawSky(){
+ const gradient=ctx.createLinearGradient(
+  0,0,0,SCREEN.height
+ );
+
+ gradient.addColorStop(0,"#55b8e8");
+ gradient.addColorStop(.65,"#b9e8d1");
+ gradient.addColorStop(1,"#e6f6c4");
+
+ ctx.fillStyle=gradient;
+ ctx.fillRect(0,0,SCREEN.width,SCREEN.height);
+}
+
+function drawSun(){
+ ctx.fillStyle="#fff0a0";
+ ctx.beginPath();
+ ctx.arc(SCREEN.width-75,85,38,0,Math.PI*2);
+ ctx.fill();
+}
+
+function drawCloud(x,y,size){
+ ctx.fillStyle="rgba(255,255,255,.82)";
+
+ ctx.beginPath();
+ ctx.arc(x,y,size*.35,0,Math.PI*2);
+ ctx.arc(x+size*.35,y-10,size*.4,0,Math.PI*2);
+ ctx.arc(x+size*.7,y,size*.32,0,Math.PI*2);
+ ctx.fill();
+}
+
+function drawMountains(){
+ for(let i=0;i<9;i++){
+  const x=i*230-(camera.x*.18%230);
+
+  ctx.fillStyle=i%2?"#73b879":"#5da66c";
+
+  ctx.beginPath();
+  ctx.moveTo(x,SCREEN.height-65);
+  ctx.quadraticCurveTo(
+   x+110,SCREEN.height-300,
+   x+230,SCREEN.height-65
+  );
+  ctx.fill();
+ }
+}
+
+function drawTrees(){
+ for(let i=0;i<40;i++){
+  const x=i*175-camera.x*.55;
+
+  if(x<-70||x>SCREEN.width+70)continue;
+
+  const base=SCREEN.height-65;
+
+  ctx.fillStyle="#795331";
+  ctx.fillRect(x,base-95,14,95);
+
+  ctx.fillStyle="#25834a";
+  ctx.beginPath();
+  ctx.arc(x+7,base-115,35,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle="#46a858";
+  ctx.beginPath();
+  ctx.arc(x-12,base-125,22,0,Math.PI*2);
+  ctx.fill();
+ }
+}
+
+function drawBackground(){
+ drawSky();
+ drawSun();
+
+ for(let i=0;i<6;i++){
+  let x=(i*270-camera.x*.1)%(SCREEN.width+300);
+  drawCloud(x,100+(i%3)*45,75);
+ }
+
+ drawMountains();
+ drawTrees();
+}
+
+/* =========================================
+   16. KAMERA
+========================================= */
+
+function updateCamera(){
+ camera.targetX=
+  player.x-SCREEN.width*.35;
+
+ camera.targetX=Math.max(
+  0,
+  Math.min(
+   CONFIG.worldWidth-SCREEN.width,
+   camera.targetX
+  )
+ );
+
+ camera.x+=
+  (camera.targetX-camera.x)*CONFIG.cameraSmooth;
+}
+
+/* =========================================
+   17. PERLANGGARAN ASAS
+========================================= */
+
+function rectanglesOverlap(a,b){
+ return (
+  a.x<b.x+b.width &&
+  a.x+a.width>b.x &&
+  a.y<b.y+b.height &&
+  a.y+a.height>b.y
+ );
+}
+
+/* =========================================
+   18. FIZIK DAN PERGERAKAN
+========================================= */
+
+function updatePlayerPhysics(){
+ const direction=getHorizontalInput();
+
+ player.velocityX=direction*player.speed;
+
+ if(direction!==0){
+  player.direction=direction;
+ }
+
+ const oldBottom=player.y+player.height;
+
+ player.x+=player.velocityX;
+
+ player.x=Math.max(
+  0,
+  Math.min(
+   CONFIG.worldWidth-player.width,
+   player.x
+  )
+ );
+
+ player.velocityY+=CONFIG.gravity;
+ player.velocityY=Math.min(player.velocityY,16);
+
+ player.y+=player.velocityY;
+
+ player.grounded=false;
+
+ const newBottom=player.y+player.height;
+
+ for(const p of platforms){
+  const horizontal=
+   player.x+player.width>p.x &&
+   player.x<p.x+p.width;
+
+  if(
+   horizontal &&
+   oldBottom<=p.y &&
+   newBottom>=p.y &&
+   player.velocityY>=0
+  ){
+   player.y=p.y-player.height;
+   player.velocityY=0;
+   player.grounded=true;
+   player.airJumpAvailable=true;
+  }
+ }
+
+ if(player.y>SCREEN.height+180){
+  playerLoseLife();
+ }
+
+ if(player.invincible>0){
+  player.invincible--;
+ }
+
+ if(player.attack.timer>0){
+  player.attack.timer--;
+ }else{
+  player.attack.active=false;
+ }
+
+ if(player.attack.cooldown>0){
+  player.attack.cooldown--;
+ }
+
+ updatePlayerAnimation();
+}
+
+/* =========================================
+   19. SKOR DAN NYAWA
+========================================= */
+
+function updateHUD(){
+ UI.score.textContent=score;
+ UI.lives.textContent=lives;
+ UI.bonus.textContent=openedBonuses;
+ UI.mission.textContent=
+  currentMission+"/"+CONFIG.totalMissions;
+}
+
+function showNotification(message,duration=1800){
+ UI.notification.textContent=message;
+ UI.notification.style.display="block";
+
+ clearTimeout(showNotification.timer);
+
+ showNotification.timer=setTimeout(()=>{
+  UI.notification.style.display="none";
+ },duration);
+}
+
+function playerLoseLife(){
+ if(player.invincible>0)return;
+
+ lives--;
+ player.invincible=100;
+ player.velocityY=-8;
+
+ updateHUD();
+
+ showNotification("AWAS! NYAWA BERKURANG");
+
+ if(lives<=0){
+  gameOver();
+ }
+}
+
+/* =========================================
+   20. PAPARAN MENU
+========================================= */
+
+function drawMenuPreview(){
+ if(gameState!=="menu")return;
+
+ camera.x=0;
+
+ drawBackground();
+ drawPlatforms();
+ drawPlayer();
+}
+
+/* =========================================
+   21. MULAKAN PERMAINAN
+========================================= */
+
+function resetPlayer(){
+ player.x=100;
+ player.y=SCREEN.height-160;
+
+ player.velocityX=0;
+ player.velocityY=0;
+
+ player.direction=1;
+ player.grounded=false;
+ player.jumping=false;
+ player.airJumpAvailable=true;
+
+ player.invincible=0;
+
+ player.animation.state="idle";
+ player.animation.frame=0;
+ player.animation.timer=0;
+
+ player.attack.active=false;
+ player.attack.timer=0;
+ player.attack.cooldown=0;
+}
+
+function startGame(){
+ score=0;
+ lives=CONFIG.maximumLives;
+ openedBonuses=0;
+ currentMission=1;
+
+ gameClock=0;
+ previousFrame=0;
+ frameNumber=0;
+
+ camera.x=0;
+ camera.y=0;
+
+ resetPlayer();
+ createPlatforms();
+
+ gameState="playing";
+ gameStarted=true;
+ gamePaused=false;
+
+ UI.menu.style.display="none";
+
+ resetJoystick();
+ updateHUD();
+
+ previousFrame=performance.now();
+
+ requestAnimationFrame(gameLoop);
+}
+
+/* =========================================
+   22. BUTANG MENU
+========================================= */
+
+UI.start.addEventListener("click",startGame);
+
+UI.instructions.addEventListener("click",function(){
+ showNotification(
+  "Gunakan joystick untuk bergerak. LOMPAT untuk melompat. SERANG untuk menyerang.",
+  4000
+ );
+});
+
+/* =========================================
+   23. PAPARAN KEMATIAN
+========================================= */
+
+function gameOver(){
+ gameState="over";
+
+ UI.menu.style.display="flex";
+
+ const card=document.querySelector(".menu-card");
+
+ card.innerHTML=`
+  <div class="game-logo">GAME<br>OVER</div>
+  <div class="menu-description">
+   Permainan tamat.<br>
+   Markah akhir: <b>${score}</b><br>
+   Kotak bonus: <b>${openedBonuses}/20</b>
+  </div>
+  <button class="primary-button" id="restartGame">
+   MAIN SEMULA
+  </button>
+ `;
+
+ document.getElementById("restartGame")
+  .addEventListener("click",function(){
+   card.innerHTML=`
+    <div class="game-logo">SUPER<br>DURIAN</div>
+    <div class="menu-description">
+     Pengembaraan seorang wira menentang durian berduri.
+    </div>
+    <button class="primary-button" id="startButton">
+     MULA PERMAINAN
+    </button>
+   `;
+
+   document.getElementById("startButton")
+    .addEventListener("click",startGame);
+
+   startGame();
+  });
+}
+
+/* =========================================
+   24. RENDER UTAMA
+========================================= */
+
+function renderGame(){
+ ctx.clearRect(
+  0,0,SCREEN.width,SCREEN.height
+ );
+
+ drawBackground();
+ drawPlatforms();
+ drawPlayer();
+}
+
+/* =========================================
+   25. GELUNG PERMAINAN
+========================================= */
+
+function gameLoop(timestamp){
+ if(gameState!=="playing")return;
+
+ const elapsed=timestamp-previousFrame;
+ previousFrame=timestamp;
+
+ const delta=Math.min(elapsed/16.667,2);
+
+ gameClock+=elapsed;
+ frameNumber++;
+
+ updatePlayerPhysics();
+ updateCamera();
+
+ renderGame();
+
+ requestAnimationFrame(gameLoop);
+}
+
+/* =========================================
+   26. PERSEDIAAN AWAL
+========================================= */
+
+function initialiseGame(){
+ resizeCanvas();
+ createPlatforms();
+ resetPlayer();
+ updateHUD();
+ drawMenuPreview();
+}
+
+initialiseGame();
+
+/* =========================================
+   AKHIR BAHAGIAN 1
+   BAHAGIAN 2 AKAN DISAMBUNG DI SINI
+========================================= */
+
+// =====================================================
+// SUPER DURIAN
+// BAHAGIAN 2/3
+// MUSUH, BONUS, SUARA DAN GANJARAN
+// =====================================================
+
+// -----------------------------------------------------
+// 27. DATA MUSUH DURIAN
+// -----------------------------------------------------
+
+const ENEMY_CONFIG = {
+ normalSpeed:1.15,
+ fastSpeed:2.1,
+ largeSpeed:.75,
+ contactDamage:25,
+ stompBounce:10,
+ stompScore:30,
+ shootScore:25
+};
+
+let enemies=[];
+let enemyIdCounter=0;
+
+function createEnemy(data={}){
+ return {
+  id:++enemyIdCounter,
+  x:data.x||500,
+  y:data.y||SCREEN.height-120,
+  width:data.width||52,
+  height:data.height||52,
+  type:data.type||"normal",
+  speed:data.speed||ENEMY_CONFIG.normalSpeed,
+  direction:data.direction||1,
+  minX:data.minX||0,
+  maxX:data.maxX||CONFIG.worldWidth,
+  alive:true,
+  health:data.health||1,
+  animation:0,
+  attackTimer:0,
+  color:data.color||"#75b934"
+ };
+}
+
+// -----------------------------------------------------
+// 28. JANA MUSUH MENGIKUT LALUAN
+// -----------------------------------------------------
+
+function generateEnemies(){
+ enemies=[];
+ enemyIdCounter=0;
+
+ for(let i=0;i<18;i++){
+  const x=430+i*315;
+
+  let type="normal";
+  let speed=ENEMY_CONFIG.normalSpeed;
+  let width=52;
+  let height=52;
+  let health=1;
+
+  if(i%5===2){
+   type="fast";
+   speed=ENEMY_CONFIG.fastSpeed;
+  }
+
+  if(i%7===4){
+   type="large";
+   speed=ENEMY_CONFIG.largeSpeed;
+   width=68;
+   height=68;
+   health=2;
+  }
+
+  enemies.push(createEnemy({
+   x:x,
+   y:SCREEN.height-65-height,
+   width,
+   height,
+   type,
+   speed,
+   minX:x-95,
+   maxX:x+145,
+   health
+  }));
+ }
+}
+
+// -----------------------------------------------------
+// 29. LUKIS DURIAN
+// -----------------------------------------------------
+
+function drawEnemyDurian(enemy){
+ if(!enemy.alive)return;
+
+ const x=enemy.x-camera.x;
+ const y=enemy.y;
+ const w=enemy.width;
+ const h=enemy.height;
+
+ ctx.save();
+ ctx.translate(x+w/2,y+h/2);
+
+ const pulse=Math.sin(enemy.animation)*1.5;
+ ctx.scale(1+pulse*.01,1-pulse*.01);
+
+ // Bayang
+ ctx.fillStyle="rgba(0,0,0,.20)";
+ ctx.beginPath();
+ ctx.ellipse(0,h*.48,w*.4,5,0,0,Math.PI*2);
+ ctx.fill();
+
+ // Duri utama
+ const spikes=16;
+
+ for(let i=0;i<spikes;i++){
+  const angle=i*Math.PI*2/spikes;
+
+  const inner=w*.28;
+  const outer=w*.52;
+
+  ctx.fillStyle=i%2===0?"#245e21":"#347c25";
+
+  ctx.beginPath();
+  ctx.moveTo(
+   Math.cos(angle)*inner,
+   Math.sin(angle)*inner
+  );
+
+  ctx.lineTo(
+   Math.cos(angle)*outer,
+   Math.sin(angle)*outer
+  );
+
+  ctx.lineTo(
+   Math.cos(angle+.18)*inner,
+   Math.sin(angle+.18)*inner
+  );
+
+  ctx.closePath();
+  ctx.fill();
+ }
+
+ // Kulit buah
+ ctx.fillStyle=enemy.color;
+ ctx.beginPath();
+ ctx.ellipse(0,0,w*.39,h*.37,0,0,Math.PI*2);
+ ctx.fill();
+
+ // Tompok kulit
+ ctx.fillStyle="#4a942d";
+
+ for(let i=0;i<8;i++){
+  const a=i*Math.PI/4;
+
+  ctx.beginPath();
+  ctx.arc(
+   Math.cos(a)*w*.22,
+   Math.sin(a)*h*.19,
+   2.5,
+   0,
+   Math.PI*2
+  );
+  ctx.fill();
+ }
+
+ // Mata
+ ctx.fillStyle="#162c17";
+
+ ctx.beginPath();
+ ctx.arc(-w*.13,-h*.05,3.3,0,Math.PI*2);
+ ctx.arc(w*.13,-h*.05,3.3,0,Math.PI*2);
+ ctx.fill();
+
+ // Mulut
+ ctx.strokeStyle="#172e19";
+ ctx.lineWidth=2.5;
+
+ ctx.beginPath();
+ ctx.arc(0,h*.07,7,0,Math.PI);
+ ctx.stroke();
+
+ // Kening
+ ctx.strokeStyle="#285321";
+ ctx.lineWidth=2;
+
+ ctx.beginPath();
+ ctx.moveTo(-w*.2,-h*.15);
+ ctx.lineTo(-w*.08,-h*.18);
+ ctx.moveTo(w*.08,-h*.18);
+ ctx.lineTo(w*.2,-h*.15);
+ ctx.stroke();
+
+ ctx.restore();
+}
+
+// -----------------------------------------------------
+// 30. PERGERAKAN MUSUH
+// -----------------------------------------------------
+
+function updateEnemies(){
+ for(const enemy of enemies){
+  if(!enemy.alive)continue;
+
+  enemy.animation+=.09;
+
+  enemy.x+=enemy.speed*enemy.direction;
+
+  if(enemy.x<enemy.minX){
+   enemy.x=enemy.minX;
+   enemy.direction=1;
+  }
+
+  if(enemy.x+enemy.width>enemy.maxX){
+   enemy.x=enemy.maxX-enemy.width;
+   enemy.direction=-1;
+  }
+
+  enemy.attackTimer++;
+
+  checkEnemyCollision(enemy);
+ }
+}
+
+// -----------------------------------------------------
+// 31. PERLANGGARAN WATAK DENGAN DURIAN
+// -----------------------------------------------------
+
+function checkEnemyCollision(enemy){
+ const a={
+  x:player.x+5,
+  y:player.y+5,
+  width:player.width-10,
+  height:player.height-5
+ };
+
+ const b={
+  x:enemy.x+5,
+  y:enemy.y+5,
+  width:enemy.width-10,
+  height:enemy.height-5
+ };
+
+ if(!rectanglesOverlap(a,b))return;
+
+ const playerBottom=player.y+player.height;
+
+ const comingFromTop=
+  player.velocityY>0 &&
+  playerBottom-enemy.y<24;
+
+ if(comingFromTop){
+  enemy.health--;
+
+  if(enemy.health<=0){
+   destroyEnemy(enemy);
+  }
+
+  player.velocityY=-ENEMY_CONFIG.stompBounce;
+  player.grounded=false;
+
+  return;
+ }
+
+ if(player.invincible<=0){
+  playerLoseLife();
+ }
+}
+
+// -----------------------------------------------------
+// 32. MUSNAHKAN MUSUH
+// -----------------------------------------------------
+
+function destroyEnemy(enemy){
+ if(!enemy.alive)return;
+
+ enemy.alive=false;
+
+ score+=ENEMY_CONFIG.stompScore;
+
+ updateHUD();
+
+ createExplosion(
+  enemy.x+enemy.width/2,
+  enemy.y+enemy.height/2,
+  "#8bcf39",
+  16
+ );
+
+ showNotification("DURIAN DITEWASKAN! +30");
+}
+
+// -----------------------------------------------------
+// 33. SISTEM PELURU
+// -----------------------------------------------------
+
+let projectiles=[];
+let projectileId=0;
+
+function createProjectile(){
+ const direction=player.direction;
+
+ projectiles.push({
+  id:++projectileId,
+  x:direction===1?
+   player.x+player.width:
+   player.x-15,
+  y:player.y+34,
+  width:17,
+  height:9,
+  velocityX:direction*9,
+  alive:true,
+  life:100
+ });
+}
+
+// Gantikan fungsi playerAttack Bahagian 1
+playerAttack=function(){
+ if(gameState!=="playing")return;
+ if(player.attack.cooldown>0)return;
+
+ player.attack.active=true;
+ player.attack.timer=14;
+ player.attack.cooldown=25;
+
+ createProjectile();
+};
+
+// -----------------------------------------------------
+// 34. KEMASKINI PELURU
+// -----------------------------------------------------
+
+function updateProjectiles(){
+ for(let i=projectiles.length-1;i>=0;i--){
+  const p=projectiles[i];
+
+  if(!p.alive){
+   projectiles.splice(i,1);
+   continue;
+  }
+
+  p.x+=p.velocityX;
+  p.life--;
+
+  for(const enemy of enemies){
+   if(!enemy.alive)continue;
+
+   const a={
+    x:p.x,
+    y:p.y,
+    width:p.width,
+    height:p.height
+   };
+
+   const b={
+    x:enemy.x,
+    y:enemy.y,
+    width:enemy.width,
+    height:enemy.height
+   };
+
+   if(rectanglesOverlap(a,b)){
+    enemy.health--;
+
+    p.alive=false;
+
+    if(enemy.health<=0){
+     destroyEnemy(enemy);
+    }else{
+     createExplosion(
+      enemy.x+enemy.width/2,
+      enemy.y+enemy.height/2,
+      "#b9df51",
+      8
+     );
+    }
+
+    break;
+   }
+  }
+
+  if(p.life<=0)p.alive=false;
+  if(p.x<0||p.x>CONFIG.worldWidth)p.alive=false;
+ }
+}
+
+// -----------------------------------------------------
+// 35. LUKIS PELURU
+// -----------------------------------------------------
+
+function drawProjectiles(){
+ for(const p of projectiles){
+  if(!p.alive)continue;
+
+  const x=p.x-camera.x;
+
+  ctx.save();
+
+  ctx.fillStyle="#ffed6a";
+  ctx.shadowColor="#ffe34a";
+  ctx.shadowBlur=12;
+
+  ctx.beginPath();
+  ctx.ellipse(
+   x,
+   p.y,
+   10,
+   5,
+   0,
+   0,
+   Math.PI*2
+  );
+
+  ctx.fill();
+  ctx.restore();
+ }
+}
+
+// -----------------------------------------------------
+// 36. DATA 20 KOTAK BONUS
+// -----------------------------------------------------
+
+const BONUS_CONFIG={
+ total:20,
+ requiredWords:10,
+ reward:100,
+ proximity:100
+};
+
+let bonusBoxes=[];
+let bonusCounter=0;
+
+function createBonusBox(index,x,y){
+ return {
+  id:index,
+  x,
+  y,
+  width:46,
+  height:46,
+  opened:false,
+  touched:false,
+  available:false,
+  active:false,
+  animation:Math.random()*10,
+  reward:BONUS_CONFIG.reward
+ };
+}
+
+// -----------------------------------------------------
+// 37. JANA 20 KOTAK BONUS
+// -----------------------------------------------------
+
+function generateBonusBoxes(){
+ bonusBoxes=[];
+ bonusCounter=0;
+
+ for(let i=0;i<BONUS_CONFIG.total;i++){
+  const x=260+i*285;
+
+  const platformY=
+   SCREEN.height-65;
+
+  const elevated=(i%3===1);
+
+  const y=elevated?
+   platformY-225:
+   platformY-85;
+
+  bonusBoxes.push(
+   createBonusBox(i+1,x,y)
+  );
+ }
+}
+
+// -----------------------------------------------------
+// 38. LUKIS KOTAK BONUS
+// -----------------------------------------------------
+
+function drawBonusBox(box){
+ if(box.opened)return;
+
+ const x=box.x-camera.x;
+ const y=box.y;
+
+ box.animation+=.045;
+
+ const floatY=Math.sin(box.animation)*2;
+
+ ctx.save();
+ ctx.translate(x,y+floatY);
+
+ // Bayang
+ ctx.fillStyle="#0004";
+ ctx.fillRect(5,box.height+3,box.width-10,5);
+
+ // Badan kotak
+ ctx.fillStyle="#95601e";
+ ctx.fillRect(0,0,box.width,box.height);
+
+ // Permukaan
+ ctx.fillStyle="#d99b37";
+ ctx.fillRect(4,4,box.width-8,box.height-8);
+
+ // Jalur tengah
+ ctx.fillStyle="#f4ce67";
+ ctx.fillRect(17,0,12,box.height);
+
+ // Penutup
+ ctx.fillStyle="#f6dc83";
+ ctx.fillRect(0,4,box.width,8);
+
+ // Tanda soal
+ ctx.fillStyle="#fff3b3";
+ ctx.font="bold 23px Arial";
+ ctx.textAlign="center";
+ ctx.fillText("?",box.width/2,32);
+
+ // Bingkai
+ ctx.strokeStyle="#69400d";
+ ctx.lineWidth=3;
+ ctx.strokeRect(0,0,box.width,box.height);
+
+ // Cahaya apabila telah disentuh
+ if(box.touched){
+  ctx.strokeStyle="#e7ff87";
+  ctx.lineWidth=3;
+  ctx.strokeRect(-4,-4,box.width+8,box.height+8);
+ }
+
+ ctx.restore();
+}
+
+// -----------------------------------------------------
+// 39. SEMAK PERLANGGARAN KOTAK
+// -----------------------------------------------------
+
+function checkBonusBoxCollision(){
+ if(gameState!=="playing")return;
+ if(bonusTarget)return;
+
+ for(const box of bonusBoxes){
+  if(box.opened)continue;
+
+  const a={
+   x:player.x,
+   y:player.y,
+   width:player.width,
+   height:player.height
+  };
+
+  const b={
+   x:box.x,
+   y:box.y,
+   width:box.width,
+   height:box.height
+  };
+
+  if(rectanglesOverlap(a,b)){
+   box.touched=true;
+   box.available=true;
+
+   showNotification(
+    "KOTAK BONUS "+box.id+"! KLIK DAN TAHAN"
+   );
+
+   openBonusBox(box);
+   break;
+  }
+ }
+}
+
+// -----------------------------------------------------
+// 40. SISTEM SASARAN BONUS
+// -----------------------------------------------------
+
+let bonusTarget=null;
+
+let bonusSession={
+ holding:false,
+ pointerId:null,
+ count:0,
+ completed:false,
+ started:false
+};
+
+// -----------------------------------------------------
+// 41. RUJUKAN PAPARAN BONUS
+// -----------------------------------------------------
+
+function updateBonusDisplay(){
+ UI.bonusCount.textContent=
+  bonusSession.count+" / 10";
+
+ UI.bonusBar.style.width=
+  (bonusSession.count/10*100)+"%";
+}
+
+// -----------------------------------------------------
+// 42. BUKA PANEL BONUS
+// -----------------------------------------------------
+
+function openBonusBox(box){
+ if(box.opened)return;
+ if(!box.touched)return;
+
+ bonusTarget=box;
+
+ bonusSession.holding=false;
+ bonusSession.pointerId=null;
+ bonusSession.count=0;
+ bonusSession.completed=false;
+ bonusSession.started=false;
+
+ updateBonusDisplay();
+
+ UI.bonusStatus.textContent=
+  "Klik dan tahan. Sebut Subhanallah 10 kali.";
+
+ UI.holdBonus.disabled=false;
+ UI.holdBonus.textContent="KLIK DAN TAHAN";
+
+ UI.bonusLayer.style.display="flex";
+}
+
+// -----------------------------------------------------
+// 43. NORMALISASI TEKS SUARA
+// -----------------------------------------------------
+
+function normalizeSpeech(text){
+ return String(text||"")
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g,"")
+  .replace(/[.,!?;:]/g," ")
+  .replace(/\s+/g," ")
+  .trim();
+}
+
+// -----------------------------------------------------
+// 44. PADANAN SEBUTAN
+// -----------------------------------------------------
+
+function isSubhanallah(text){
+ const t=normalizeSpeech(text);
+
+ const accepted=[
+  "subhanallah",
+  "subhan allah",
+  "subhanal lah",
+  "subhan allah"
+ ];
+
+ return accepted.includes(t);
+}
+
+// -----------------------------------------------------
+// 45. PENGESANAN SUARA
+// -----------------------------------------------------
+
+let speechRecognition=null;
+let speechSupported=false;
+let speechPermissionGranted=false;
+let recognitionRestarting=false;
+
+function getSpeechConstructor(){
+ return window.SpeechRecognition||
+        window.webkitSpeechRecognition||
+        null;
+}
+
+// -----------------------------------------------------
+// 46. CIPTA ENJIN PENGECAMAN
+// -----------------------------------------------------
+
+function createSpeechEngine(){
+ const SpeechAPI=getSpeechConstructor();
+
+ if(!SpeechAPI){
+  speechSupported=false;
+
+  UI.bonusStatus.textContent=
+   "Pelayar tidak menyokong pengecaman suara. Gunakan Chrome.";
+
+  return false;
+ }
+
+ speechSupported=true;
+
+ speechRecognition=new SpeechAPI();
+
+ speechRecognition.lang="ms-MY";
+ speechRecognition.continuous=true;
+ speechRecognition.interimResults=true;
+ speechRecognition.maxAlternatives=3;
+
+ speechRecognition.onstart=function(){
+  speechPermissionGranted=true;
+  recognitionRestarting=false;
+
+  UI.bonusStatus.textContent=
+   "Mikrofon aktif. Sebut Subhanallah.";
+ };
+
+ speechRecognition.onresult=function(event){
+  if(!bonusSession.holding)return;
+  if(!bonusTarget)return;
+
+  for(
+   let i=event.resultIndex;
+   i<event.results.length;
+   i++
+  ){
+   const result=event.results[i];
+
+   if(!result.isFinal)continue;
+
+   const transcript=
+    normalizeSpeech(result[0].transcript);
+
+   processRecognizedSpeech(transcript);
+  }
+ };
+
+ speechRecognition.onerror=function(event){
+  if(event.error==="not-allowed"||
+     event.error==="service-not-allowed"){
+   UI.bonusStatus.textContent=
+    "Mikrofon tidak dibenarkan. Benarkan akses mikrofon.";
+  }else if(event.error==="no-speech"){
+   UI.bonusStatus.textContent=
+    "Belum mengesan suara. Sebut dengan jelas.";
+  }else if(event.error==="network"){
+   UI.bonusStatus.textContent=
+    "Ralat sambungan pengecaman suara.";
+  }else{
+   UI.bonusStatus.textContent=
+    "Pengecaman suara: "+event.error;
+  }
+ };
+
+ speechRecognition.onend=function(){
+  recognitionRestarting=false;
+
+  if(
+   bonusSession.holding &&
+   bonusTarget &&
+   gameState==="playing"
+  ){
+   restartSpeechEngine();
+  }
+ };
+
+ return true;
+}
+
+// -----------------------------------------------------
+// 47. MULAKAN MIKROFON
+// -----------------------------------------------------
+
+function startSpeechEngine(){
+ if(!speechRecognition){
+  if(!createSpeechEngine())return false;
+ }
+
+ try{
+  speechRecognition.start();
+  return true;
+ }catch(error){
+  return false;
+ }
+}
+
+// -----------------------------------------------------
+// 48. MULAKAN SEMULA PENGECAMAN
+// -----------------------------------------------------
+
+function restartSpeechEngine(){
+ if(recognitionRestarting)return;
+
+ recognitionRestarting=true;
+
+ setTimeout(function(){
+  recognitionRestarting=false;
+
+  if(
+   !bonusSession.holding||
+   !bonusTarget||
+   gameState!=="playing"
+  )return;
+
+  try{
+   speechRecognition.start();
+  }catch(error){
+   // Enjin mungkin masih aktif.
+  }
+ },350);
+}
+
+// -----------------------------------------------------
+// 49. HENTIKAN MIKROFON
+// -----------------------------------------------------
+
+function stopSpeechEngine(){
+ if(!speechRecognition)return;
+
+ try{
+  speechRecognition.stop();
+ }catch(error){}
+
+ recognitionRestarting=false;
+}
+
+// -----------------------------------------------------
+// 50. KIRA SEBUTAN SEBENAR
+// -----------------------------------------------------
+
+function processRecognizedSpeech(transcript){
+ if(!bonusSession.holding)return;
+ if(!bonusTarget)return;
+ if(bonusSession.completed)return;
+
+ // Setiap keputusan akhir yang mengandungi
+ // satu padanan sebutan diterima sebagai satu kiraan.
+ if(isSubhanallah(transcript)){
+  registerSubhanallah();
+ }
+}
+
+// -----------------------------------------------------
+// 51. DAFTAR SATU SEBUTAN
+// -----------------------------------------------------
+
+function registerSubhanallah(){
+ if(!bonusSession.holding)return;
+ if(bonusSession.count>=10)return;
+
+ bonusSession.count++;
+
+ updateBonusDisplay();
+
+ UI.bonusStatus.textContent=
+  "Alhamdulillah! Sebutan dikesan: "+
+  bonusSession.count+"/10";
+
+ if(bonusSession.count>=10){
+  completeBonusBox();
+ }
+}
+
+// -----------------------------------------------------
+// 52. MULA KLIK DAN TAHAN
+// -----------------------------------------------------
+
+function beginBonusHold(event){
+ if(!bonusTarget)return;
+ if(bonusTarget.opened)return;
+ if(bonusSession.holding)return;
+
+ event.preventDefault();
+
+ bonusSession.holding=true;
+ bonusSession.started=true;
+ bonusSession.pointerId=event.pointerId;
+ bonusSession.count=0;
+
+ updateBonusDisplay();
+
+ UI.holdBonus.textContent=
+  "TAHAN DAN SEBUT SUBHANALLAH";
+
+ UI.bonusStatus.textContent=
+  "Mendengar sebutan... 0/10";
+
+ try{
+  UI.holdBonus.setPointerCapture(event.pointerId);
+ }catch(error){}
+
+ startSpeechEngine();
+}
+
+// -----------------------------------------------------
+// 53. LEPASKAN KLIK
+// -----------------------------------------------------
+
+function endBonusHold(event){
+ if(!bonusSession.holding)return;
+
+ if(
+  event &&
+  bonusSession.pointerId!==null &&
+  event.pointerId!==bonusSession.pointerId
+ ){
+  return;
+ }
+
+ bonusSession.holding=false;
+ bonusSession.pointerId=null;
+
+ stopSpeechEngine();
+
+ if(bonusSession.count>=10){
+  completeBonusBox();
+ }else{
+  UI.holdBonus.textContent="KLIK DAN TAHAN";
+
+  UI.bonusStatus.textContent=
+   "Baru "+bonusSession.count+
+   "/10. Ulangi dan cukupkan 10 sebutan.";
+ }
+}
+
+// -----------------------------------------------------
+// 54. EVENT KLIK BONUS
+// -----------------------------------------------------
+
+UI.holdBonus.addEventListener(
+ "pointerdown",
+ beginBonusHold
+);
+
+UI.holdBonus.addEventListener(
+ "pointerup",
+ endBonusHold
+);
+
+UI.holdBonus.addEventListener(
+ "pointercancel",
+ endBonusHold
+);
+
+// -----------------------------------------------------
+// 55. TUTUP PANEL BONUS
+// -----------------------------------------------------
+
+UI.closeBonus.addEventListener("click",function(){
+ bonusSession.holding=false;
+ bonusSession.pointerId=null;
+
+ stopSpeechEngine();
+
+ UI.bonusLayer.style.display="none";
+ bonusTarget=null;
+});
+
+// -----------------------------------------------------
+// 56. SELESAIKAN KOTAK BONUS
+// -----------------------------------------------------
+
+function completeBonusBox(){
+ if(!bonusTarget)return;
+ if(bonusTarget.opened)return;
+ if(bonusSession.count<10)return;
+
+ bonusSession.completed=true;
+ bonusSession.holding=false;
+
+ stopSpeechEngine();
+
+ bonusTarget.opened=true;
+ bonusTarget.active=false;
+
+ score+=bonusTarget.reward;
+ openedBonuses++;
+
+ updateHUD();
+
+ createExplosion(
+  bonusTarget.x+bonusTarget.width/2,
+  bonusTarget.y+bonusTarget.height/2,
+  "#ffdf65",
+  30
+ );
+
+ UI.bonusStatus.textContent=
+  "TAHNIAH! KOTAK BONUS BERJAYA DIBUKA!";
+
+ UI.bonusCount.textContent="10 / 10";
+ UI.bonusBar.style.width="100%";
+
+ UI.holdBonus.textContent="BONUS BERJAYA!";
+ UI.holdBonus.disabled=true;
+
+ showNotification(
+  "BONUS DIBUKA! +"+bonusTarget.reward+" MATA",
+  2500
+ );
+
+ setTimeout(function(){
+  UI.bonusLayer.style.display="none";
+  UI.holdBonus.disabled=false;
+  UI.holdBonus.textContent="KLIK DAN TAHAN";
+  bonusTarget=null;
+ },1700);
+}
+
+// -----------------------------------------------------
+// 57. PARTIKEL DAN LETUPAN
+// -----------------------------------------------------
+
+let effects=[];
+
+function createExplosion(x,y,color,count=12){
+ for(let i=0;i<count;i++){
+  const angle=Math.random()*Math.PI*2;
+  const speed=1+Math.random()*5;
+
+  effects.push({
+   x,
+   y,
+   velocityX:Math.cos(angle)*speed,
+   velocityY:Math.sin(angle)*speed,
+   size:3+Math.random()*5,
+   life:25+Math.random()*25,
+   maxLife:50,
+   color
+  });
+ }
+}
+
+// -----------------------------------------------------
+// 58. KEMASKINI PARTIKEL
+// -----------------------------------------------------
+
+function updateEffects(){
+ for(let i=effects.length-1;i>=0;i--){
+  const p=effects[i];
+
+  p.x+=p.velocityX;
+  p.y+=p.velocityY;
+
+  p.velocityY+=.12;
+  p.velocityX*=.98;
+
+  p.life--;
+
+  if(p.life<=0){
+   effects.splice(i,1);
+  }
+ }
+}
+
+// -----------------------------------------------------
+// 59. LUKIS PARTIKEL
+// -----------------------------------------------------
+
+function drawEffects(){
+ for(const p of effects){
+  const alpha=Math.max(0,p.life/p.maxLife);
+
+  ctx.save();
+
+  ctx.globalAlpha=alpha;
+  ctx.fillStyle=p.color;
+
+  ctx.beginPath();
+  ctx.arc(
+   p.x-camera.x,
+   p.y,
+   p.size,
+   0,
+   Math.PI*2
+  );
+
+  ctx.fill();
+  ctx.restore();
+ }
+}
+
+// -----------------------------------------------------
+// 60. SISTEM GANJARAN
+// -----------------------------------------------------
+
+function rewardPlayer(amount,reason){
+ score+=amount;
+ updateHUD();
+
+ showNotification(
+  reason+" +"+amount+" MATA"
+ );
+}
+
+// -----------------------------------------------------
+// 61. SEMAK SEMUA BONUS
+// -----------------------------------------------------
+
+function getRemainingBonuses(){
+ return bonusBoxes.filter(
+  box=>!box.opened
+ ).length;
+}
+
+function allBonusesCompleted(){
+ return getRemainingBonuses()===0;
+}
+
+// -----------------------------------------------------
+// 62. KEMASKINI HUD BONUS
+// -----------------------------------------------------
+
+function refreshBonusHUD(){
+ UI.bonus.textContent=openedBonuses;
+
+ if(openedBonuses>=20){
+  showNotification(
+   "TAHNIAH! SEMUA 20 KOTAK BONUS DIBUKA!",
+   3000
+  );
+ }
+}
+
+// -----------------------------------------------------
+// 63. KEMASKINI SEMUA OBJEK BAHAGIAN 2
+// -----------------------------------------------------
+
+function updateBonusAndEnemies(){
+ if(gameState!=="playing")return;
+
+ updateEnemies();
+ updateProjectiles();
+ updateEffects();
+ checkBonusBoxCollision();
+}
+
+// -----------------------------------------------------
+// 64. LUKIS SEMUA OBJEK BAHAGIAN 2
+// -----------------------------------------------------
+
+function drawBonusAndEnemies(){
+ for(const enemy of enemies){
+  drawEnemyDurian(enemy);
+ }
+
+ for(const box of bonusBoxes){
+  drawBonusBox(box);
+ }
+
+ drawProjectiles();
+ drawEffects();
+}
+
+// -----------------------------------------------------
+// 65. PENYELARASAN FUNGSI DENGAN BAHAGIAN 1
+// -----------------------------------------------------
+
+const previousCreatePlatforms=createPlatforms;
+
+function prepareWorldObjects(){
+ previousCreatePlatforms();
+
+ generateEnemies();
+ generateBonusBoxes();
+
+ projectiles=[];
+ effects=[];
+}
+
+// -----------------------------------------------------
+// 66. KEMASKINI FUNGSI START GAME
+// -----------------------------------------------------
+
+const previousStartGame=startGame;
+
+startGame=function(){
+ previousStartGame();
+
+ prepareWorldObjects();
+
+ updateHUD();
+};
+
+// -----------------------------------------------------
+// 67. KEMASKINI FUNGSI RENDER
+// -----------------------------------------------------
+
+const previousRenderGame=renderGame;
+
+renderGame=function(){
+ ctx.clearRect(
+  0,0,SCREEN.width,SCREEN.height
+ );
+
+ drawBackground();
+ drawPlatforms();
+
+ drawBonusAndEnemies();
+
+ drawPlayer();
+};
+
+// -----------------------------------------------------
+// 68. KEMASKINI GELUNG PERMAINAN
+// -----------------------------------------------------
+
+const previousUpdatePlayerPhysics=updatePlayerPhysics;
+
+updatePlayerPhysics=function(){
+ previousUpdatePlayerPhysics();
+};
+
+// -----------------------------------------------------
+// 69. SAMBUNG KEMASKINI OBJEK
+// -----------------------------------------------------
+
+const previousGameLoop=gameLoop;
+
+gameLoop=function(timestamp){
+ if(gameState!=="playing")return;
+
+ const elapsed=timestamp-previousFrame;
+ previousFrame=timestamp;
+
+ const delta=Math.min(elapsed/16.667,2);
+
+ gameClock+=elapsed;
+ frameNumber++;
+
+ updatePlayerPhysics();
+ updateCamera();
+
+ updateBonusAndEnemies();
+
+ renderGame();
+
+ requestAnimationFrame(gameLoop);
+};
+
+// -----------------------------------------------------
+// 70. KEBERSIHAN MIKROFON
+// -----------------------------------------------------
+
+document.addEventListener(
+ "visibilitychange",
+ function(){
+  if(document.hidden){
+   bonusSession.holding=false;
+   bonusSession.pointerId=null;
+
+   stopSpeechEngine();
+  }
+ }
+);
+
+// -----------------------------------------------------
+// 71. KESELAMATAN PANEL BONUS
+// -----------------------------------------------------
+
+window.addEventListener("blur",function(){
+ if(bonusSession.holding){
+  bonusSession.holding=false;
+  bonusSession.pointerId=null;
+
+  stopSpeechEngine();
+ }
+});
+
+// -----------------------------------------------------
+// 72. MAKLUMAT BAHAGIAN 2
+// -----------------------------------------------------
+
+const PART_TWO_INFO={
+ enemies:true,
+ bonusBoxes:20,
+ voiceRecognition:true,
+ requiredPhrase:"Subhanallah",
+ requiredCount:10,
+ holdOnce:true,
+ microphoneOnlyForBonus:true
+};
+
+console.log(
+ "SUPER DURIAN BAHAGIAN 2 DIMUATKAN",
+ PART_TWO_INFO
+);
+
+// =====================================================
+// AKHIR BAHAGIAN 2
+// BAHAGIAN 3 AKAN DISAMBUNG SELEPAS INI
+// =====================================================
+
+/* =========================================================
+   BAHAGIAN 3 — MISI, CHECKPOINT, RAJA DURIAN DAN PENAMAT
+   Tampal selepas Bahagian 2, sebelum </script>
+========================================================= */
+
+/* ---------- 1. TETAPAN UTAMA ---------- */
+
+var SD3 = {
+    totalMissions: 20,
+    missionWidth: 900,
+    currentMission: 0,
+    checkpoint: 0,
+    bossActive: false,
+    bossDefeated: false,
+    paused: false,
+    won: false,
+    soundOn: true,
+    lastSave: 0,
+    boss: {
+        x: 18400,
+        y: 0,
+        width: 125,
+        height: 125,
+        hp: 20,
+        maxHp: 20,
+        speed: 2.2,
+        direction: -1,
+        attackTimer: 0,
+        flash: 0
+    },
+    missions: [
+        "KUTIP BOTOL PLASTIK",
+        "KITAR SEMULA TIN",
+        "BERSIHKAN KAWASAN",
+        "SELAMATKAN ARNAB",
+        "BANTU ORANG TUA",
+        "BERKONGSI REZEKI",
+        "TABUNG MASJID",
+        "SELAMATKAN ANAK BURUNG",
+        "JAGA KEBERSIHAN SUNGAI",
+        "TANAM POKOK",
+        "BANTU JIRAN",
+        "HORMATI IBU BAPA",
+        "JAGA HAIWAN",
+        "KUTIP SAMPAH",
+        "BANTU RAKAN",
+        "SEDekAH MAKANAN",
+        "SELAMATKAN HUTAN",
+        "BERSIHKAN KAMPUNG",
+        "DUNIA JATIDIRI",
+        "PERTARUNGAN RAJA DURIAN"
+    ],
+    descriptions: [
+        "Kutip botol plastik yang bertaburan.",
+        "Kumpulkan tin untuk dikitar semula.",
+        "Bersihkan kawasan daripada sampah.",
+        "Selamatkan arnab yang memerlukan bantuan.",
+        "Bantu orang tua melintasi jalan.",
+        "Kongsikan rezeki dengan orang lain.",
+        "Kumpulkan sumbangan untuk tabung masjid.",
+        "Selamatkan anak burung.",
+        "Pastikan sungai bersih.",
+        "Tanam pokok untuk alam sekitar.",
+        "Bantu jiran yang memerlukan.",
+        "Amalkan sikap hormat kepada ibu bapa.",
+        "Lindungi haiwan daripada bahaya.",
+        "Kutip sampah di sekitar kampung.",
+        "Bantu rakan yang menghadapi kesukaran.",
+        "Berkongsi makanan dengan orang lain.",
+        "Lindungi hutan daripada kemusnahan.",
+        "Jadikan kampung tempat yang bersih.",
+        "Buktikan jati diri terpuji.",
+        "Kalahkan Raja Durian!"
+    ]
+};
+
+/* ---------- 2. AUDIO PERMAINAN ---------- */
+
+var SD3Audio = {
+    context: null,
+
+    init: function () {
+        try {
+            var AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            if (!this.context) this.context = new AC();
+            if (this.context.state === "suspended") {
+                this.context.resume();
+            }
+        } catch (e) {}
+    },
+
+    tone: function (frequency, duration, type, volume) {
+        if (!SD3.soundOn) return;
+
+        try {
+            this.init();
+            if (!this.context) return;
+
+            var oscillator = this.context.createOscillator();
+            var gain = this.context.createGain();
+
+            oscillator.type = type || "sine";
+            oscillator.frequency.value = frequency;
+            gain.gain.value = volume || 0.08;
+
+            oscillator.connect(gain);
+            gain.connect(this.context.destination);
+
+            oscillator.start();
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                this.context.currentTime + duration
+            );
+            oscillator.stop(this.context.currentTime + duration);
+        } catch (e) {}
+    },
+
+    jump: function () {
+        this.tone(420, 0.12, "sine", 0.06);
+    },
+
+    hit: function () {
+        this.tone(110, 0.2, "sawtooth", 0.09);
+    },
+
+    collect: function () {
+        this.tone(720, 0.12, "sine", 0.07);
+        setTimeout(function () {
+            SD3Audio.tone(950, 0.16, "sine", 0.06);
+        }, 100);
+    },
+
+    victory: function () {
+        this.tone(523, 0.2, "sine", 0.08);
+        setTimeout(function () {
+            SD3Audio.tone(659, 0.2, "sine", 0.08);
+        }, 180);
+        setTimeout(function () {
+            SD3Audio.tone(784, 0.35, "sine", 0.08);
+        }, 360);
+    }
+};
+
+/* ---------- 3. PAPARAN MISI ---------- */
+
+var SD3MissionPanel = document.createElement("div");
+
+SD3MissionPanel.id = "sd3-mission-panel";
+SD3MissionPanel.style.cssText =
+    "position:fixed;top:12px;left:50%;transform:translateX(-50%);" +
+    "z-index:1000;background:rgba(0,0,0,.72);color:white;" +
+    "padding:9px 16px;border-radius:14px;text-align:center;" +
+    "font-family:Arial;pointer-events:none;min-width:180px;" +
+    "border:1px solid rgba(255,255,255,.25);";
+
+SD3MissionPanel.innerHTML =
+    "<b id='sd3-mission-number'>MISI 1/20</b>" +
+    "<div id='sd3-mission-name' style='font-size:12px;margin-top:4px'>" +
+    SD3.missions[0] +
+    "</div>";
+
+document.body.appendChild(SD3MissionPanel);
+
+function SD3UpdateMissionPanel() {
+    var number = document.getElementById("sd3-mission-number");
+    var name = document.getElementById("sd3-mission-name");
+
+    if (number) {
+        number.textContent =
+            "MISI " + (SD3.currentMission + 1) + "/20";
+    }
+
+    if (name) {
+        name.textContent = SD3.missions[SD3.currentMission];
+    }
+}
+
+function SD3SetMission(index) {
+    index = Math.max(
+        0,
+        Math.min(SD3.totalMissions - 1, index)
+    );
+
+    if (index === SD3.currentMission) return;
+
+    SD3.currentMission = index;
+    SD3.checkpoint = index;
+
+    SD3UpdateMissionPanel();
+    SD3SaveProgress();
+    SD3Audio.collect();
+
+    if (typeof showNotification === "function") {
+        showNotification(
+            "MISI " + (index + 1) + ": " + SD3.missions[index]
+        );
+    }
+}
+
+/* ---------- 4. SISTEM SIMPANAN ---------- */
+
+function SD3SaveProgress() {
+    try {
+        var data = {
+            mission: SD3.currentMission,
+            checkpoint: SD3.checkpoint,
+            sound: SD3.soundOn
+        };
+
+        localStorage.setItem(
+            "SUPER_DURIAN_PROGRESS",
+            JSON.stringify(data)
+        );
+
+        SD3.lastSave = Date.now();
+    } catch (e) {}
+}
+
+function SD3LoadProgress() {
+    try {
+        var raw = localStorage.getItem("SUPER_DURIAN_PROGRESS");
+        if (!raw) return;
+
+        var data = JSON.parse(raw);
+
+        if (typeof data.mission === "number") {
+            SD3.currentMission = Math.max(
+                0,
+                Math.min(19, data.mission)
+            );
+        }
+
+        if (typeof data.checkpoint === "number") {
+            SD3.checkpoint = Math.max(
+                0,
+                Math.min(19, data.checkpoint)
+            );
+        }
+
+        if (typeof data.sound === "boolean") {
+            SD3.soundOn = data.sound;
+        }
+    } catch (e) {}
+}
+
+SD3LoadProgress();
+SD3UpdateMissionPanel();
+
+/* ---------- 5. CHECKPOINT ---------- */
+
+function SD3DrawCheckpoint() {
+    if (typeof ctx === "undefined") return;
+    if (typeof player === "undefined") return;
+
+    var ground = typeof SCREEN !== "undefined"
+        ? SCREEN.height - 35
+        : 400;
+
+    var checkpointX =
+        (SD3.checkpoint + 1) * SD3.missionWidth;
+
+    var camera = typeof cameraX !== "undefined"
+        ? cameraX
+        : 0;
+
+    var screenX = checkpointX - camera;
+
+    if (screenX < -100 || screenX > canvas.width + 100) {
+        return;
+    }
+
+    ctx.save();
+
+    ctx.fillStyle = "#f5d742";
+    ctx.fillRect(screenX, ground - 100, 5, 100);
+
+    ctx.fillStyle = "#e63946";
+    ctx.beginPath();
+    ctx.moveTo(screenX + 5, ground - 100);
+    ctx.lineTo(screenX + 55, ground - 82);
+    ctx.lineTo(screenX + 5, ground - 65);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+}
+
+function SD3CheckMissionProgress() {
+    if (typeof player === "undefined") return;
+    if (SD3.bossDefeated) return;
+
+    var mission = Math.floor(
+        Math.max(0, player.x) / SD3.missionWidth
+    );
+
+    mission = Math.min(19, mission);
+
+    if (mission > SD3.currentMission) {
+        SD3SetMission(mission);
+    }
+}
+
+/* ---------- 6. RAJA DURIAN ---------- */
+
+function SD3DrawBoss() {
+    if (typeof ctx === "undefined") return;
+    if (typeof canvas === "undefined") return;
+
+    var camera = typeof cameraX !== "undefined"
+        ? cameraX
+        : 0;
+
+    var bx = SD3.boss.x - camera;
+    var ground = canvas.height - 35;
+    var by = ground - SD3.boss.height;
+
+    SD3.boss.y = by;
+
+    if (bx < -200 || bx > canvas.width + 200) return;
+
+    ctx.save();
+
+    if (SD3.boss.flash > 0) {
+        ctx.globalAlpha = 0.55;
+    }
+
+    /* Badan durian */
+    ctx.fillStyle = "#477b25";
+    ctx.beginPath();
+    ctx.arc(
+        bx + 62,
+        by + 62,
+        56,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
+
+    /* Duri */
+    ctx.fillStyle = "#244d18";
+
+    for (var i = 0; i < 18; i++) {
+        var angle = (Math.PI * 2 / 18) * i;
+        var sx = bx + 62 + Math.cos(angle) * 48;
+        var sy = by + 62 + Math.sin(angle) * 48;
+
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(
+            bx + 62 + Math.cos(angle) * 68,
+            by + 62 + Math.sin(angle) * 68
+        );
+        ctx.lineTo(
+            sx + 8,
+            sy + 8
+        );
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    /* Wajah */
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.arc(bx + 43, by + 52, 9, 0, Math.PI * 2);
+    ctx.arc(bx + 78, by + 52, 9, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#111";
+    ctx.beginPath();
+    ctx.arc(bx + 45, by + 53, 4, 0, Math.PI * 2);
+    ctx.arc(bx + 80, by + 53, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = "#2a160b";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(bx + 61, by + 76, 17, 0.15, Math.PI - 0.15);
+    ctx.stroke();
+
+    ctx.restore();
+
+    /* Bar nyawa bos */
+    ctx.fillStyle = "#222";
+    ctx.fillRect(bx + 5, by - 22, 115, 11);
+
+    ctx.fillStyle = "#e53935";
+    ctx.fillRect(
+        bx + 5,
+        by - 22,
+        115 * (SD3.boss.hp / SD3.boss.maxHp),
+        11
+    );
+
+    ctx.strokeStyle = "#fff";
+    ctx.strokeRect(bx + 5, by - 22, 115, 11);
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 12px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("RAJA DURIAN", bx + 62, by - 28);
+}
+
+function SD3UpdateBoss() {
+    if (SD3.bossDefeated) return;
+    if (typeof player === "undefined") return;
+
+    var distance = Math.abs(
+        player.x - SD3.boss.x
+    );
+
+    if (distance < 850) {
+        SD3.bossActive = true;
+        SD3.currentMission = 19;
+        SD3UpdateMissionPanel();
+    }
+
+    if (!SD3.bossActive) return;
+
+    var boss = SD3.boss;
+
+    if (distance < 500) {
+        if (boss.x > player.x + 90) {
+            boss.x -= boss.speed;
+        } else if (boss.x < player.x - 90) {
+            boss.x += boss.speed;
+        }
+    }
+
+    boss.attackTimer++;
+
+    if (boss.attackTimer > 110) {
+        boss.attackTimer = 0;
+
+        if (distance < 160) {
+            if (typeof lives !== "undefined" && lives > 0) {
+                lives--;
+            }
+
+            if (typeof updateHUD === "function") {
+                updateHUD();
+            }
+
+            SD3Audio.hit();
+
+            if (typeof showNotification === "function") {
+                showNotification("Awas! Raja Durian menyerang!");
+            }
+        }
+    }
+
+    if (boss.flash > 0) boss.flash--;
+}
+
+/* ---------- 7. SERANGAN KEPADA BOS ---------- */
+
+function SD3DamageBoss(amount) {
+    if (!SD3.bossActive || SD3.bossDefeated) return;
+
+    SD3.boss.hp -= amount || 1;
+    SD3.boss.flash = 8;
+
+    SD3Audio.hit();
+
+    if (SD3.boss.hp <= 0) {
+        SD3.boss.hp = 0;
+        SD3DefeatBoss();
+    }
+}
+
+function SD3CheckPlayerAttack() {
+    if (!SD3.bossActive || SD3.bossDefeated) return;
+    if (typeof player === "undefined") return;
+
+    var distance = Math.abs(
+        player.x - SD3.boss.x
+    );
+
+    var verticalDistance = Math.abs(
+        (player.y || 0) - SD3.boss.y
+    );
+
+    if (distance < 135 && verticalDistance < 150) {
+        if (typeof player.attacking !== "undefined" &&
+            player.attacking) {
+            SD3DamageBoss(1);
+        }
+    }
+}
+
+/* ---------- 8. PELURU PEMAIN BOLEH MENGENAI BOS ---------- */
+
+function SD3CheckProjectiles() {
+    if (!SD3.bossActive || SD3.bossDefeated) return;
+
+    if (typeof projectiles === "undefined") return;
+
+    for (var i = 0; i < projectiles.length; i++) {
+        var bullet = projectiles[i];
+
+        if (!bullet) continue;
+
+        var bx = bullet.x || 0;
+        var by = bullet.y || 0;
+
+        if (
+            bx > SD3.boss.x - 65 &&
+            bx < SD3.boss.x + 125 &&
+            by > SD3.boss.y - 20 &&
+            by < SD3.boss.y + 130
+        ) {
+            SD3DamageBoss(1);
+            bullet.x = -9999;
+            bullet.y = -9999;
+        }
+    }
+}
+
+/* ---------- 9. BOS KALAH ---------- */
+
+function SD3DefeatBoss() {
+    if (SD3.bossDefeated) return;
+
+    SD3.bossDefeated = true;
+    SD3.bossActive = false;
+    SD3.won = true;
+
+    if (typeof score !== "undefined") {
+        score += 1000;
+    }
+
+    if (typeof updateHUD === "function") {
+        updateHUD();
+    }
+
+    SD3Audio.victory();
+    SD3SaveProgress();
+
+    SD3ShowVictoryScreen();
+}
+
+function SD3ShowVictoryScreen() {
+    var overlay = document.createElement("div");
+
+    overlay.id = "sd3-victory-overlay";
+    overlay.style.cssText =
+        "position:fixed;inset:0;z-index:99999;" +
+        "background:rgba(0,0,0,.88);display:flex;" +
+        "align-items:center;justify-content:center;" +
+        "padding:20px;font-family:Arial;color:white;";
+
+    overlay.innerHTML =
+        "<div style='max-width:420px;width:100%;text-align:center;" +
+        "background:#183b2b;border:2px solid #e8d36b;" +
+        "border-radius:22px;padding:28px'>" +
+        "<div style='font-size:54px'>🏆</div>" +
+        "<h1 style='color:#ffe36b'>TAHNIAH!</h1>" +
+        "<h2>RAJA DURIAN TELAH DIKALAHKAN</h2>" +
+        "<p>Semua 20 misi telah diselesaikan.</p>" +
+        "<p>Teruskan mengamalkan nilai jati diri terpuji!</p>" +
+        "<button id='sd3-play-again' style='padding:13px 25px;" +
+        "border:0;border-radius:12px;background:#f2cf42;" +
+        "font-weight:bold;font-size:16px'>MAIN SEMULA</button>" +
+        "</div>";
+
+    document.body.appendChild(overlay);
+
+    document.getElementById("sd3-play-again").onclick =
+        function () {
+            overlay.remove();
+            SD3ResetGame();
+        };
+}
+
+/* ---------- 10. RESET PERMAINAN ---------- */
+
+function SD3ResetGame() {
+    SD3.currentMission = 0;
+    SD3.checkpoint = 0;
+    SD3.bossActive = false;
+    SD3.bossDefeated = false;
+    SD3.won = false;
+
+    SD3.boss.x = 18400;
+    SD3.boss.hp = SD3.boss.maxHp;
+    SD3.boss.attackTimer = 0;
+
+    try {
+        localStorage.removeItem("SUPER_DURIAN_PROGRESS");
+    } catch (e) {}
+
+    SD3UpdateMissionPanel();
+
+    if (typeof startGame === "function") {
+        startGame();
+    }
+}
+
+/* ---------- 11. BUTANG PAUSE ---------- */
+
+var SD3PauseButton = document.createElement("button");
+
+SD3PauseButton.id = "sd3-pause-button";
+SD3PauseButton.textContent = "Ⅱ";
+SD3PauseButton.style.cssText =
+    "position:fixed;right:12px;top:12px;z-index:2000;" +
+    "width:42px;height:42px;border:1px solid white;" +
+    "border-radius:50%;background:rgba(0,0,0,.65);" +
+    "color:white;font-size:20px;";
+
+document.body.appendChild(SD3PauseButton);
+
+var SD3PauseOverlay = document.createElement("div");
+
+SD3PauseOverlay.id = "sd3-pause-overlay";
+SD3PauseOverlay.style.cssText =
+    "display:none;position:fixed;inset:0;z-index:99998;" +
+    "background:rgba(0,0,0,.8);color:white;" +
+    "align-items:center;justify-content:center;" +
+    "font-family:Arial;text-align:center;";
+
+SD3PauseOverlay.innerHTML =
+    "<div><h1>PERMAINAN DIJEDA</h1>" +
+    "<p>Tekan sambung untuk terus bermain.</p>" +
+    "<button id='sd3-resume' style='padding:12px 25px;" +
+    "border:0;border-radius:10px;background:#f2cf42;" +
+    "font-weight:bold'>SAMBUNG</button></div>";
+
+document.body.appendChild(SD3PauseOverlay);
+
+function SD3Pause() {
+    SD3.paused = true;
+    SD3PauseOverlay.style.display = "flex";
+}
+
+function SD3Resume() {
+    SD3.paused = false;
+    SD3PauseOverlay.style.display = "none";
+    SD3Audio.init();
+}
+
+SD3PauseButton.onclick = function () {
+    if (SD3.paused) {
+        SD3Resume();
+    } else {
+        SD3Pause();
+    }
+};
+
+document.getElementById("sd3-resume").onclick = SD3Resume;
+
+/* ---------- 12. BUTANG BUNYI ---------- */
+
+var SD3SoundButton = document.createElement("button");
+
+SD3SoundButton.id = "sd3-sound-button";
+SD3SoundButton.textContent = "🔊";
+SD3SoundButton.style.cssText =
+    "position:fixed;right:62px;top:12px;z-index:2000;" +
+    "width:42px;height:42px;border:1px solid white;" +
+    "border-radius:50%;background:rgba(0,0,0,.65);" +
+    "color:white;font-size:18px;";
+
+document.body.appendChild(SD3SoundButton);
+
+SD3SoundButton.onclick = function () {
+    SD3.soundOn = !SD3.soundOn;
+    SD3SoundButton.textContent = SD3.soundOn ? "🔊" : "🔇";
+    SD3SaveProgress();
+
+    if (SD3.soundOn) SD3Audio.init();
+};
+
+/* ---------- 13. KEYBOARD PAUSE ---------- */
+
+document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" || event.key.toLowerCase() === "p") {
+        if (SD3.paused) {
+            SD3Resume();
+        } else {
+            SD3Pause();
+        }
+    }
+});
+
+/* ---------- 14. SAMBUNGAN DENGAN GAME LOOP ---------- */
+
+/* Simpan fungsi asal daripada Bahagian 2 */
+var SD3PreviousGameLoop = gameLoop;
+
+gameLoop = function (timestamp) {
+    if (SD3.paused || SD3.won) {
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+
+    try {
+        SD3CheckMissionProgress();
+        SD3UpdateBoss();
+        SD3CheckPlayerAttack();
+        SD3CheckProjectiles();
+
+        if (Date.now() - SD3.lastSave > 10000) {
+            SD3SaveProgress();
+        }
+    } catch (error) {
+        console.warn("SD3 update:", error);
+    }
+
+    if (typeof SD3PreviousGameLoop === "function") {
+        SD3PreviousGameLoop(timestamp);
+    } else {
+        requestAnimationFrame(gameLoop);
+    }
+};
+
+/* ---------- 15. SAMBUNGAN PAPARAN ---------- */
+
+var SD3PreviousRenderGame = renderGame;
+
+renderGame = function () {
+    if (typeof SD3PreviousRenderGame === "function") {
+        SD3PreviousRenderGame();
+    }
+
+    try {
+        SD3DrawCheckpoint();
+        SD3DrawBoss();
+    } catch (error) {
+        console.warn("SD3 render:", error);
+    }
+};
+
+/* ---------- 16. SAMBUNGAN MULA PERMAINAN ---------- */
+
+var SD3PreviousStartGame = startGame;
+
+startGame = function () {
+    SD3.paused = false;
+    SD3.won = false;
+    SD3PauseOverlay.style.display = "none";
+
+    if (typeof SD3PreviousStartGame === "function") {
+        SD3PreviousStartGame();
+    }
+
+    SD3.boss.x = 18400;
+    SD3.boss.hp = SD3.boss.maxHp;
+    SD3.bossActive = false;
+    SD3.bossDefeated = false;
+
+    SD3UpdateMissionPanel();
+    SD3Audio.init();
+};
+
+/* ---------- 17. TAMAT BAHAGIAN 3 ---------- */
+
+console.log("SUPER DURIAN: BAHAGIAN 3 DIMUATKAN");
+
+/* =====================================================
+   BAHAGIAN 4 — GAME LOOP GUARD & SISTEM PEMBAIKAN
+===================================================== */
+
+/* 1. KAWALAN FRAME PERMAINAN */
+
+var SD4 = {
+    running: false,
+    frame: 0,
+    lastTimestamp: 0,
+    attackCooldown: 0,
+    bossHitCooldown: 0,
+    damageCooldown: 0,
+    lastPlayerX: 0,
+    lastMission: -1,
+    initialized: true
+};
+
+/* 2. HENTIKAN SERANGAN BERULANG TERLALU CEPAT */
+
+function SD4CanAttackBoss() {
+    if (SD4.bossHitCooldown > 0) {
+        SD4.bossHitCooldown--;
+        return false;
+    }
+
+    SD4.bossHitCooldown = 28;
+    return true;
+}
+
+/* 3. HADKAN SERANGAN BOS */
+
+function SD4CanBossDamagePlayer() {
+    if (SD4.damageCooldown > 0) {
+        SD4.damageCooldown--;
+        return false;
+    }
+
+    SD4.damageCooldown = 90;
+    return true;
+}
+
+/* 4. SEMAK SERANGAN PEMAIN */
+
+var SD4PreviousCheckPlayerAttack = SD3CheckPlayerAttack;
+
+SD3CheckPlayerAttack = function () {
+    if (!SD4CanAttackBoss()) return;
+
+    if (typeof player === "undefined") return;
+    if (!SD3.bossActive || SD3.bossDefeated) return;
+
+    var distance = Math.abs(player.x - SD3.boss.x);
+
+    if (distance > 135) return;
+
+    var isAttacking = false;
+
+    if (player.attacking) isAttacking = true;
+    if (player.isAttacking) isAttacking = true;
+
+    if (isAttacking) {
+        SD3DamageBoss(1);
+    }
+};
+
+/* 5. SEMAK SERANGAN BOS */
+
+var SD4PreviousUpdateBoss = SD3UpdateBoss;
+
+SD3UpdateBoss = function () {
+    if (SD3.bossDefeated) return;
+    if (!SD3.bossActive) {
+        SD4PreviousUpdateBoss();
+        return;
+    }
+
+    var before = typeof lives !== "undefined" ? lives : null;
+
+    SD4PreviousUpdateBoss();
+
+    if (
+        before !== null &&
+        typeof lives !== "undefined" &&
+        lives < before
+    ) {
+        if (!SD4CanBossDamagePlayer()) {
+            lives = before;
+            if (typeof updateHUD === "function") {
+                updateHUD();
+            }
+        }
+    }
+};
+
+/* 6. PAPARAN STATUS PERMAINAN */
+
+function SD4Status() {
+    return {
+        mission: SD3.currentMission + 1,
+        totalMission: SD3.totalMissions,
+        bossActive: SD3.bossActive,
+        bossHealth: SD3.boss.hp,
+        paused: SD3.paused,
+        completed: SD3.won
+    };
+}
+
+/* 7. PULIHKAN KEDUDUKAN PERMAINAN */
+
+function SD4ResetCombat() {
+    SD4.attackCooldown = 0;
+    SD4.bossHitCooldown = 0;
+    SD4.damageCooldown = 0;
+    SD4.lastTimestamp = 0;
+}
+
+/* 8. KAWAL BUTANG MULA SEMULA */
+
+function SD4Restart() {
+    SD4ResetCombat();
+
+    SD3.paused = false;
+    SD3.won = false;
+    SD3.bossActive = false;
+    SD3.bossDefeated = false;
+
+    SD3.boss.hp = SD3.boss.maxHp;
+    SD3.boss.x = 18400;
+
+    SD3.currentMission = 0;
+    SD3.checkpoint = 0;
+
+    SD3UpdateMissionPanel();
+
+    try {
+        localStorage.removeItem("SUPER_DURIAN_PROGRESS");
+    } catch (e) {}
+
+    if (typeof startGame === "function") {
+        startGame();
+    }
+}
+
+/* 9. KAWAL TAB BROWSER */
+
+document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+        SD3Pause();
+    }
+});
+
+/* 10. KAWAL SAIZ PAPARAN */
+
+window.addEventListener("resize", function () {
+    if (typeof resizeCanvas === "function") {
+        resizeCanvas();
+    }
+});
+
+/* 11. KAWAL KUNCI PERMAINAN */
+
+document.addEventListener("keydown", function (event) {
+    if (
+        event.key === " " ||
+        event.key === "ArrowUp" ||
+        event.key === "ArrowDown" ||
+        event.key === "ArrowLeft" ||
+        event.key === "ArrowRight"
+    ) {
+        if (SD3.paused) {
+            event.preventDefault();
+        }
+    }
+});
+
+/* 12. PAPARAN KEMAJUAN */
+
+function SD4ProgressText() {
+    return (
+        "MISI " +
+        (SD3.currentMission + 1) +
+        " / " +
+        SD3.totalMissions
+    );
+}
+
+/* 13. SEMAK KEMENANGAN */
+
+function SD4CheckVictory() {
+    if (SD3.bossDefeated && !SD3.won) {
+        SD3.won = true;
+        SD3ShowVictoryScreen();
+    }
+}
+
+/* 14. PEMBAIKAN SIMPANAN */
+
+function SD4SaveNow() {
+    SD3SaveProgress();
+
+    try {
+        localStorage.setItem(
+            "SUPER_DURIAN_LAST_SAVE",
+            String(Date.now())
+        );
+    } catch (e) {}
+}
+
+/* 15. STATUS KONSOL */
+
+console.log("BAHAGIAN 4 AKTIF");
+console.log("Status:", SD4Status());
+
+/* 16. TAMAT BAHAGIAN 4 */
+
+/* =====================================================
+   BAHAGIAN 5 — BONUS, GANJARAN DAN KOLEKSI
+===================================================== */
+
+var SD5 = {
+    totalBoxes: 20,
+    opened: [],
+    rewards: [],
+    particles: [],
+    combo: 0,
+    totalPoints: 0,
+    activeBox: null,
+    opening: false,
+    completed: false
+};
+
+/* 1. SENARAI GANJARAN */
+
+SD5.rewards = [
+    { name: "BINTANG EMAS", icon: "⭐", points: 50 },
+    { name: "PERMATA HIJAU", icon: "💎", points: 100 },
+    { name: "HATI KEBAIKAN", icon: "❤️", points: 75 },
+    { name: "TROFI JATI DIRI", icon: "🏆", points: 150 },
+    { name: "POKOK KEHIDUPAN", icon: "🌳", points: 100 },
+    { name: "KUNCI EMAS", icon: "🔑", points: 125 },
+    { name: "BINTANG CAHAYA", icon: "✨", points: 100 },
+    { name: "BUNGA KEBAIKAN", icon: "🌸", points: 75 },
+    { name: "PERISAI", icon: "🛡️", points: 125 },
+    { name: "MAHKOTA", icon: "👑", points: 200 },
+    { name: "BOLA CAHAYA", icon: "🔮", points: 100 },
+    { name: "BULAN EMAS", icon: "🌙", points: 100 },
+    { name: "MATAHARI", icon: "☀️", points: 100 },
+    { name: "BUNGA RAYA", icon: "🌺", points: 75 },
+    { name: "BINTANG BIRU", icon: "💠", points: 125 },
+    { name: "HADIAH REZEKI", icon: "🎁", points: 150 },
+    { name: "KUNCI SYURGA", icon: "🗝️", points: 200 },
+    { name: "CAHAYA IMAN", icon: "🕌", points: 150 },
+    { name: "PERMATA ISTIMEWA", icon: "💎", points: 250 },
+    { name: "GANJARAN TERHEBAT", icon: "🏅", points: 500 }
+];
+
+/* 2. REKOD KOTAK */
+
+function SD5IsOpened(index) {
+    return SD5.opened.indexOf(index) !== -1;
+}
+
+function SD5MarkOpened(index) {
+    if (!SD5IsOpened(index)) {
+        SD5.opened.push(index);
+    }
+}
+
+/* 3. SIMPAN KOLEKSI */
+
+function SD5Save() {
+    try {
+        localStorage.setItem(
+            "SUPER_DURIAN_BONUS",
+            JSON.stringify({
+                opened: SD5.opened,
+                totalPoints: SD5.totalPoints
+            })
+        );
+    } catch (e) {}
+}
+
+/* 4. MUAT KOLEKSI */
+
+function SD5Load() {
+    try {
+        var data = JSON.parse(
+            localStorage.getItem("SUPER_DURIAN_BONUS") || "null"
+        );
+
+        if (!data) return;
+
+        if (Array.isArray(data.opened)) {
+            SD5.opened = data.opened;
+        }
+
+        if (typeof data.totalPoints === "number") {
+            SD5.totalPoints = data.totalPoints;
+        }
+    } catch (e) {}
+}
+
+SD5Load();
+
+/* 5. PAPARAN KOLEKSI */
+
+var SD5Panel = document.createElement("div");
+
+SD5Panel.id = "sd5-collection-panel";
+SD5Panel.style.cssText =
+    "position:fixed;left:10px;top:65px;z-index:1500;" +
+    "background:rgba(0,0,0,.72);color:white;" +
+    "padding:8px 12px;border-radius:12px;" +
+    "font:12px Arial;pointer-events:none;";
+
+SD5Panel.innerHTML =
+    "🎁 BONUS: <b id='sd5-count'>0/20</b>" +
+    "<br>💎 MATA: <b id='sd5-points'>0</b>";
+
+document.body.appendChild(SD5Panel);
+
+function SD5UpdatePanel() {
+    var count = document.getElementById("sd5-count");
+    var points = document.getElementById("sd5-points");
+
+    if (count) {
+        count.textContent =
+            SD5.opened.length + "/" + SD5.totalBoxes;
+    }
+
+    if (points) {
+        points.textContent = SD5.totalPoints;
+    }
+}
+
+SD5UpdatePanel();
+
+/* 6. PAPARAN HADIAH */
+
+function SD5ShowReward(index) {
+    var reward = SD5.rewards[index % SD5.rewards.length];
+
+    var overlay = document.createElement("div");
+
+    overlay.style.cssText =
+        "position:fixed;inset:0;z-index:99990;" +
+        "display:flex;align-items:center;justify-content:center;" +
+        "background:rgba(0,0,0,.75);padding:20px;" +
+        "font-family:Arial;color:white;";
+
+    overlay.innerHTML =
+        "<div style='text-align:center;background:#173d2b;" +
+        "border:2px solid #f5d45b;border-radius:22px;" +
+        "padding:25px;max-width:320px;width:100%'>" +
+        "<div style='font-size:58px'>" + reward.icon + "</div>" +
+        "<h2 style='color:#ffe36b'>KOTAK DIBUKA!</h2>" +
+        "<h3>" + reward.name + "</h3>" +
+        "<p>Ganjaran: +" + reward.points + " mata</p>" +
+        "<button id='sd5-close' style='padding:12px 25px;" +
+        "border:0;border-radius:10px;background:#f5d45b;" +
+        "font-weight:bold'>TERUSKAN</button></div>";
+
+    document.body.appendChild(overlay);
+
+    document.getElementById("sd5-close").onclick = function () {
+        overlay.remove();
+        SD5.opening = false;
+    };
+}
+
+/* 7. BUKA KOTAK SELEPAS PENGESAHAN */
+
+function SD5OpenReward(index) {
+    if (index < 0 || index >= SD5.totalBoxes) return;
+    if (SD5IsOpened(index)) return;
+    if (SD5.opening) return;
+
+    SD5.opening = true;
+    SD5.activeBox = index;
+
+    SD5MarkOpened(index);
+
+    var reward = SD5.rewards[index % SD5.rewards.length];
+
+    SD5.totalPoints += reward.points;
+
+    if (typeof score !== "undefined") {
+        score += reward.points;
+    }
+
+    if (typeof updateHUD === "function") {
+        updateHUD();
+    }
+
+    SD5CreateParticles(index);
+    SD5Save();
+    SD5UpdatePanel();
+
+    SD3Audio.collect();
+
+    SD5ShowReward(index);
+
+    if (SD5.opened.length >= SD5.totalBoxes) {
+        SD5.completed = true;
+    }
+}
+
+/* 8. EFEK PARTIKEL */
+
+function SD5CreateParticles(index) {
+    var x = 100 + Math.random() * 180;
+    var y = 120 + Math.random() * 100;
+
+    for (var i = 0; i < 24; i++) {
+        SD5.particles.push({
+            x: x,
+            y: y,
+            vx: (Math.random() - 0.5) * 7,
+            vy: (Math.random() - 0.5) * 7,
+            life: 40,
+            size: 3 + Math.random() * 5
+        });
+    }
+}
+
+function SD5UpdateParticles() {
+    for (var i = SD5.particles.length - 1; i >= 0; i--) {
+        var p = SD5.particles[i];
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.12;
+        p.life--;
+
+        if (p.life <= 0) {
+            SD5.particles.splice(i, 1);
+        }
+    }
+}
+
+function SD5DrawParticles() {
+    if (typeof ctx === "undefined") return;
+
+    ctx.save();
+
+    for (var i = 0; i < SD5.particles.length; i++) {
+        var p = SD5.particles[i];
+
+        ctx.globalAlpha = Math.max(0, p.life / 40);
+        ctx.fillStyle = "#ffd84d";
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+/* 9. SAMBUNGAN SISTEM KOTAK ASAL */
+
+function SD5ConnectBonusSystem() {
+    if (typeof bonusBoxes === "undefined") return;
+
+    for (var i = 0; i < bonusBoxes.length; i++) {
+        var box = bonusBoxes[i];
+
+        if (SD5IsOpened(i)) {
+            box.opened = true;
+        }
+    }
+}
+
+/* 10. KAWAL KOTAK YANG SUDAH DIBUKA */
+
+var SD5PreviousOpenBonusBox =
+    typeof openBonusBox === "function"
+        ? openBonusBox
+        : null;
+
+if (SD5PreviousOpenBonusBox) {
+    openBonusBox = function (box) {
+        var index = -1;
+
+        if (typeof bonusBoxes !== "undefined") {
+            index = bonusBoxes.indexOf(box);
+        }
+
+        if (index >= 0 && SD5IsOpened(index)) {
+            return;
+        }
+
+        SD5PreviousOpenBonusBox(box);
+    };
+}
+
+/* 11. KEMAS KINI PARTIKEL */
+
+var SD5PreviousGameLoop = gameLoop;
+
+gameLoop = function (timestamp) {
+    if (!SD3.paused && !SD3.won) {
+        SD5UpdateParticles();
+        SD5ConnectBonusSystem();
+    }
+
+    SD5PreviousGameLoop(timestamp);
+};
+
+/* 12. PAPAR PARTIKEL SEMASA RENDER */
+
+var SD5PreviousRenderGame = renderGame;
+
+renderGame = function () {
+    SD5PreviousRenderGame();
+    SD5DrawParticles();
+};
+
+/* 13. RESET KOLEKSI */
+
+function SD5Reset() {
+    SD5.opened = [];
+    SD5.totalPoints = 0;
+    SD5.particles = [];
+    SD5.completed = false;
+
+    try {
+        localStorage.removeItem("SUPER_DURIAN_BONUS");
+    } catch (e) {}
+
+    SD5Save();
+    SD5UpdatePanel();
+}
+
+/* 14. PAPARAN TAMAT KOLEKSI */
+
+function SD5ShowCollectionComplete() {
+    if (!SD5.completed) return;
+
+    if (typeof showNotification === "function") {
+        showNotification("TAHNIAH! SEMUA 20 BONUS DIKUMPULKAN!");
+    }
+}
+
+/* 15. STATUS SISTEM */
+
+console.log("BAHAGIAN 5 AKTIF");
+console.log("Kotak bonus:", SD5.totalBoxes);
+console.log("Kotak dibuka:", SD5.opened.length);
+
+/* 16. TAMAT BAHAGIAN 5 */
+
+/* =====================================================
+   BAHAGIAN 6 — GRAFIK, ANIMASI DAN PERSEKITARAN
+===================================================== */
+
+var SD6 = {
+    clouds: [],
+    birds: [],
+    stars: [],
+    leaves: [],
+    sunX: 0,
+    animationTime: 0,
+    initialized: false
+};
+
+/* 1. JANA AWAN */
+
+function SD6CreateClouds() {
+    SD6.clouds = [];
+
+    for (var i = 0; i < 14; i++) {
+        SD6.clouds.push({
+            x: Math.random() * 1800,
+            y: 35 + Math.random() * 150,
+            size: 25 + Math.random() * 35,
+            speed: 0.25 + Math.random() * 0.5
+        });
+    }
+}
+
+/* 2. LUKIS AWAN */
+
+function SD6DrawClouds() {
+    if (typeof ctx === "undefined") return;
+
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,.85)";
+
+    for (var i = 0; i < SD6.clouds.length; i++) {
+        var c = SD6.clouds[i];
+        var x = c.x;
+
+        ctx.beginPath();
+        ctx.arc(x, c.y, c.size, 0, Math.PI * 2);
+        ctx.arc(x + c.size, c.y - 12, c.size * 0.8, 0, Math.PI * 2);
+        ctx.arc(x + c.size * 1.7, c.y, c.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+/* 3. GERAKAN AWAN */
+
+function SD6UpdateClouds() {
+    for (var i = 0; i < SD6.clouds.length; i++) {
+        var c = SD6.clouds[i];
+
+        c.x -= c.speed;
+
+        if (c.x < -150) {
+            c.x = canvas.width + 100;
+            c.y = 30 + Math.random() * 150;
+        }
+    }
+}
+
+/* 4. BURUNG TERBANG */
+
+function SD6CreateBirds() {
+    SD6.birds = [];
+
+    for (var i = 0; i < 7; i++) {
+        SD6.birds.push({
+            x: Math.random() * 1200,
+            y: 70 + Math.random() * 120,
+            speed: 1 + Math.random() * 1.5,
+            wing: Math.random() * 6
+        });
+    }
+}
+
+function SD6DrawBirds() {
+    if (typeof ctx === "undefined") return;
+
+    ctx.save();
+    ctx.strokeStyle = "#263c40";
+    ctx.lineWidth = 2;
+
+    for (var i = 0; i < SD6.birds.length; i++) {
+        var b = SD6.birds[i];
+
+        ctx.beginPath();
+        ctx.moveTo(b.x - 8, b.y);
+        ctx.quadraticCurveTo(
+            b.x - 4,
+            b.y - b.wing,
+            b.x,
+            b.y
+        );
+        ctx.quadraticCurveTo(
+            b.x + 4,
+            b.y - b.wing,
+            b.x + 8,
+            b.y
+        );
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+function SD6UpdateBirds() {
+    for (var i = 0; i < SD6.birds.length; i++) {
+        var b = SD6.birds[i];
+
+        b.x += b.speed;
+        b.wing = 4 + Math.sin(Date.now() / 100) * 5;
+
+        if (b.x > canvas.width + 30) {
+            b.x = -30;
+            b.y = 60 + Math.random() * 130;
+        }
+    }
+}
+
+/* 5. DAUN BERTERBANG */
+
+function SD6CreateLeaves() {
+    SD6.leaves = [];
+
+    for (var i = 0; i < 25; i++) {
+        SD6.leaves.push({
+            x: Math.random() * 1000,
+            y: Math.random() * 500,
+            speed: 0.5 + Math.random(),
+            rotation: Math.random() * 6
+        });
+    }
+}
+
+function SD6UpdateLeaves() {
+    for (var i = 0; i < SD6.leaves.length; i++) {
+        var leaf = SD6.leaves[i];
+
+        leaf.x += leaf.speed;
+        leaf.y += Math.sin(Date.now() / 500 + i) * 0.6;
+        leaf.rotation += 0.04;
+
+        if (leaf.x > canvas.width + 20) {
+            leaf.x = -20;
+            leaf.y = Math.random() * canvas.height;
+        }
+    }
+}
+
+function SD6DrawLeaves() {
+    if (typeof ctx === "undefined") return;
+
+    ctx.save();
+
+    for (var i = 0; i < SD6.leaves.length; i++) {
+        var leaf = SD6.leaves[i];
+
+        ctx.save();
+        ctx.translate(leaf.x, leaf.y);
+        ctx.rotate(leaf.rotation);
+        ctx.fillStyle = "#79a943";
+
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 7, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    ctx.restore();
+}
+
+/* 6. MATAHARI */
+
+function SD6DrawSun() {
+    if (typeof ctx === "undefined") return;
+
+    ctx.save();
+
+    var x = canvas.width - 100;
+    var y = 100;
+
+    ctx.fillStyle = "rgba(255,220,80,.15)";
+    ctx.beginPath();
+    ctx.arc(x, y, 65, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#ffd85a";
+    ctx.beginPath();
+    ctx.arc(x, y, 35, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+/* 7. LATAR BELAKANG BERLAPIS */
+
+function SD6DrawMountains() {
+    if (typeof ctx === "undefined") return;
+
+    var w = canvas.width;
+    var h = canvas.height;
+
+    ctx.save();
+
+    ctx.fillStyle = "#789c8d";
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.65);
+    ctx.lineTo(w * 0.18, h * 0.3);
+    ctx.lineTo(w * 0.36, h * 0.65);
+    ctx.lineTo(w * 0.56, h * 0.28);
+    ctx.lineTo(w * 0.78, h * 0.65);
+    ctx.lineTo(w, h * 0.4);
+    ctx.lineTo(w, h);
+    ctx.lineTo(0, h);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = "#527d58";
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.76);
+    ctx.lineTo(w * 0.22, h * 0.48);
+    ctx.lineTo(w * 0.44, h * 0.76);
+    ctx.lineTo(w * 0.7, h * 0.45);
+    ctx.lineTo(w, h * 0.75);
+    ctx.lineTo(w, h);
+    ctx.lineTo(0, h);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+}
+
+/* 8. ANIMASI CAHAYA */
+
+function SD6DrawGlow(x, y, radius) {
+    if (typeof ctx === "undefined") return;
+
+    var gradient = ctx.createRadialGradient(
+        x, y, 1,
+        x, y, radius
+    );
+
+    gradient.addColorStop(0, "rgba(255,255,180,.35)");
+    gradient.addColorStop(1, "rgba(255,255,180,0)");
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+/* 9. ANIMASI PEMAIN BERJALAN */
+
+function SD6PlayerAnimation() {
+    if (typeof player === "undefined") return;
+
+    SD6.animationTime += 0.12;
+
+    player.animationFrame =
+        Math.floor(SD6.animationTime) % 4;
+}
+
+/* 10. PAPARAN KESAN GRAFIK */
+
+function SD6RenderEnvironment() {
+    if (typeof ctx === "undefined") return;
+
+    SD6DrawSun();
+    SD6DrawClouds();
+    SD6DrawBirds();
+    SD6DrawLeaves();
+}
+
+/* 11. KEMAS KINI PERSEKITARAN */
+
+function SD6UpdateEnvironment() {
+    SD6UpdateClouds();
+    SD6UpdateBirds();
+    SD6UpdateLeaves();
+    SD6PlayerAnimation();
+}
+
+/* 12. INISIALISASI */
+
+function SD6Init() {
+    if (SD6.initialized) return;
+
+    SD6CreateClouds();
+    SD6CreateBirds();
+    SD6CreateLeaves();
+
+    SD6.initialized = true;
+}
+
+SD6Init();
+
+/* 13. SAMBUNGAN LOOP */
+
+var SD6PreviousGameLoop = gameLoop;
+
+gameLoop = function (timestamp) {
+    if (!SD3.paused && !SD3.won) {
+        SD6UpdateEnvironment();
+    }
+
+    SD6PreviousGameLoop(timestamp);
+};
+
+/* 14. SAMBUNGAN RENDER */
+
+var SD6PreviousRenderGame = renderGame;
+
+renderGame = function () {
+    SD6RenderEnvironment();
+    SD6PreviousRenderGame();
+};
+
+/* 15. PAPARAN STATUS */
+
+console.log("BAHAGIAN 6 AKTIF");
+console.log("Awan:", SD6.clouds.length);
+console.log("Burung:", SD6.birds.length);
+console.log("Daun:", SD6.leaves.length);
+
+/* 16. TAMAT BAHAGIAN 6 */
+
+/* =====================================================
+   BAHAGIAN 7 — LEVEL DAN OBJEKTIF MISI
+===================================================== */
+
+var SD7 = {
+    level: 1,
+    completedMissions: [],
+    missionProgress: 0,
+    missionTarget: 5,
+    missionScore: 0,
+    levelUnlocked: 1,
+    objectives: [
+        "Kutip 5 botol plastik",
+        "Kutip 5 tin minuman",
+        "Bersihkan 5 kawasan",
+        "Selamatkan 5 ekor arnab",
+        "Bantu 5 orang tua",
+        "Kongsi 5 bekalan makanan",
+        "Kumpul 5 sumbangan",
+        "Selamatkan 5 anak burung",
+        "Kutip 5 sampah sungai",
+        "Tanam 5 pokok",
+        "Bantu 5 orang jiran",
+        "Lakukan 5 amalan hormat",
+        "Selamatkan 5 haiwan",
+        "Kutip 5 sampah kampung",
+        "Bantu 5 orang rakan",
+        "Sedekahkan 5 makanan",
+        "Lindungi 5 kawasan hutan",
+        "Bersihkan 5 kawasan kampung",
+        "Selesaikan 5 cabaran jati diri",
+        "Kalahkan Raja Durian"
+    ]
+};
+
+/* 1. PANEL OBJEKTIF */
+
+var SD7Panel = document.createElement("div");
+
+SD7Panel.id = "sd7-objective-panel";
+SD7Panel.style.cssText =
+    "position:fixed;left:10px;bottom:100px;z-index:1500;" +
+    "background:rgba(0,0,0,.72);color:white;" +
+    "padding:10px 13px;border-radius:12px;" +
+    "font:12px Arial;max-width:230px;pointer-events:none;";
+
+SD7Panel.innerHTML =
+    "<b id='sd7-level'>LEVEL 1</b>" +
+    "<div id='sd7-objective' style='margin-top:5px'>" +
+    SD7.objectives[0] +
+    "</div>" +
+    "<div style='height:7px;background:#555;margin-top:8px;" +
+    "border-radius:8px;overflow:hidden'>" +
+    "<div id='sd7-progress-bar' style='width:0%;height:100%;" +
+    "background:#f5d45b'></div></div>" +
+    "<div id='sd7-progress-text' style='margin-top:4px'>0/5</div>";
+
+document.body.appendChild(SD7Panel);
+
+/* 2. KEMAS KINI PAPARAN */
+
+function SD7UpdatePanel() {
+    var level = document.getElementById("sd7-level");
+    var objective = document.getElementById("sd7-objective");
+    var bar = document.getElementById("sd7-progress-bar");
+    var progress = document.getElementById("sd7-progress-text");
+
+    if (level) {
+        level.textContent = "LEVEL " + SD7.level;
+    }
+
+    if (objective) {
+        objective.textContent =
+            SD7.objectives[SD7.level - 1];
+    }
+
+    if (bar) {
+        bar.style.width =
+            Math.min(
+                100,
+                SD7.missionProgress / SD7.missionTarget * 100
+            ) + "%";
+    }
+
+    if (progress) {
+        progress.textContent =
+            SD7.missionProgress + "/" + SD7.missionTarget;
+    }
+}
+
+/* 3. TAMBAH KEMAJUAN MISI */
+
+function SD7AddProgress(amount) {
+    if (SD7.level === 20) return;
+    if (SD7.completedMissions.indexOf(SD7.level) !== -1) return;
+
+    SD7.missionProgress += amount || 1;
+
+    if (SD7.missionProgress >= SD7.missionTarget) {
+        SD7CompleteMission();
+    }
+
+    SD7UpdatePanel();
+}
+
+/* 4. SELESAIKAN MISI */
+
+function SD7CompleteMission() {
+    if (SD7.completedMissions.indexOf(SD7.level) !== -1) {
+        return;
+    }
+
+    SD7.completedMissions.push(SD7.level);
+    SD7.missionScore += 100;
+
+    if (typeof score !== "undefined") {
+        score += 100;
+    }
+
+    if (typeof updateHUD === "function") {
+        updateHUD();
+    }
+
+    SD3Audio.victory();
+
+    if (typeof showNotification === "function") {
+        showNotification(
+            "MISI SELESAI! GANJARAN +100 MATA"
+        );
+    }
+
+    SD7UnlockNextLevel();
+}
+
+/* 5. BUKA LEVEL SETERUSNYA */
+
+function SD7UnlockNextLevel() {
+    if (SD7.level >= 20) return;
+
+    SD7.level++;
+    SD7.levelUnlocked = Math.max(
+        SD7.levelUnlocked,
+        SD7.level
+    );
+
+    SD7.missionProgress = 0;
+
+    SD7Save();
+    SD7UpdatePanel();
+}
+
+/* 6. SIMPAN LEVEL */
+
+function SD7Save() {
+    try {
+        localStorage.setItem(
+            "SUPER_DURIAN_LEVELS",
+            JSON.stringify({
+                level: SD7.level,
+                completed: SD7.completedMissions,
+                unlocked: SD7.levelUnlocked,
+                score: SD7.missionScore
+            })
+        );
+    } catch (e) {}
+}
+
+/* 7. MUAT LEVEL */
+
+function SD7Load() {
+    try {
+        var data = JSON.parse(
+            localStorage.getItem("SUPER_DURIAN_LEVELS") || "null"
+        );
+
+        if (!data) return;
+
+        SD7.level = Math.max(
+            1,
+            Math.min(20, data.level || 1)
+        );
+
+        SD7.levelUnlocked = Math.max(
+            1,
+            Math.min(20, data.unlocked || 1)
+        );
+
+        if (Array.isArray(data.completed)) {
+            SD7.completedMissions = data.completed;
+        }
+
+        SD7.missionScore = data.score || 0;
+    } catch (e) {}
+}
+
+SD7Load();
+
+/* 8. PAPARAN LEVEL */
+
+function SD7ShowLevels() {
+    var overlay = document.createElement("div");
+
+    overlay.style.cssText =
+        "position:fixed;inset:0;z-index:99980;" +
+        "background:rgba(0,0,0,.88);display:flex;" +
+        "align-items:center;justify-content:center;" +
+        "padding:15px;color:white;font-family:Arial;";
+
+    var html =
+        "<div style='background:#173b2a;padding:20px;" +
+        "border-radius:18px;max-width:420px;width:100%;'>" +
+        "<h2 style='text-align:center;color:#ffe36b'>20 LEVEL</h2>" +
+        "<div style='display:grid;grid-template-columns:repeat(4,1fr);" +
+        "gap:7px'>";
+
+    for (var i = 1; i <= 20; i++) {
+        var unlocked = i <= SD7.levelUnlocked;
+        var completed =
+            SD7.completedMissions.indexOf(i) !== -1;
+
+        var background = completed
+            ? "#3e9b59"
+            : unlocked
+                ? "#c49a36"
+                : "#555";
+
+        html +=
+            "<div style='background:" + background +
+            ";padding:12px 4px;border-radius:8px;text-align:center'>" +
+            (completed ? "✓" : unlocked ? i : "🔒") +
+            "</div>";
+    }
+
+    html +=
+        "</div><button id='sd7-close' style='margin-top:15px;" +
+        "width:100%;padding:12px;border:0;border-radius:10px;" +
+        "background:#f5d45b;font-weight:bold'>TUTUP</button></div>";
+
+    overlay.innerHTML = html;
+    document.body.appendChild(overlay);
+
+    document.getElementById("sd7-close").onclick = function () {
+        overlay.remove();
+    };
+}
+
+/* 9. BUTANG PAPAR LEVEL */
+
+var SD7LevelButton = document.createElement("button");
+
+SD7LevelButton.textContent = "🏅";
+SD7LevelButton.title = "Senarai level";
+SD7LevelButton.style.cssText =
+    "position:fixed;right:12px;top:62px;z-index:2000;" +
+    "width:42px;height:42px;border-radius:50%;" +
+    "border:1px solid white;background:rgba(0,0,0,.65);" +
+    "color:white;font-size:19px;";
+
+document.body.appendChild(SD7LevelButton);
+
+SD7LevelButton.onclick = SD7ShowLevels;
+
+/* 10. RESET LEVEL */
+
+function SD7Reset() {
+    SD7.level = 1;
+    SD7.levelUnlocked = 1;
+    SD7.completedMissions = [];
+    SD7.missionProgress = 0;
+    SD7.missionScore = 0;
+
+    try {
+        localStorage.removeItem("SUPER_DURIAN_LEVELS");
+    } catch (e) {}
+
+    SD7UpdatePanel();
+}
+
+/* 11. PAPARAN STATUS */
+
+SD7UpdatePanel();
+
+console.log("BAHAGIAN 7 AKTIF");
+console.log("Level:", SD7.level);
+console.log("Level dibuka:", SD7.levelUnlocked);
+
+/* 12. TAMAT BAHAGIAN 7 */
+
+/* =====================================================
+   BAHAGIAN 8 — ITEM, KESIHATAN DAN POWER-UP
+===================================================== */
+
+var SD8 = {
+    health: 100,
+    maxHealth: 100,
+    energy: 100,
+    maxEnergy: 100,
+    shield: 0,
+    speedBoost: 0,
+    magnet: 0,
+    invincible: 0,
+    items: [],
+    effects: [],
+    lastDamage: 0
+};
+
+/* 1. PANEL STATUS */
+
+var SD8Panel = document.createElement("div");
+
+SD8Panel.id = "sd8-status";
+SD8Panel.style.cssText =
+    "position:fixed;right:10px;bottom:100px;z-index:1500;" +
+    "background:rgba(0,0,0,.72);color:white;" +
+    "padding:9px 12px;border-radius:12px;" +
+    "font:12px Arial;width:125px;pointer-events:none;";
+
+SD8Panel.innerHTML =
+    "<b>❤️ KESIHATAN</b>" +
+    "<div style='height:7px;background:#555;border-radius:8px;overflow:hidden'>" +
+    "<div id='sd8-health' style='height:100%;width:100%;background:#e74c3c'></div></div>" +
+    "<b style='display:block;margin-top:8px'>⚡ TENAGA</b>" +
+    "<div style='height:7px;background:#555;border-radius:8px;overflow:hidden'>" +
+    "<div id='sd8-energy' style='height:100%;width:100%;background:#f5d45b'></div></div>" +
+    "<div id='sd8-power' style='margin-top:7px'>Tiada kuasa</div>";
+
+document.body.appendChild(SD8Panel);
+
+/* 2. KEMAS KINI PAPARAN */
+
+function SD8UpdatePanel() {
+    var hp = document.getElementById("sd8-health");
+    var energy = document.getElementById("sd8-energy");
+    var power = document.getElementById("sd8-power");
+
+    if (hp) {
+        hp.style.width =
+            Math.max(0, SD8.health / SD8.maxHealth * 100) + "%";
+    }
+
+    if (energy) {
+        energy.style.width =
+            Math.max(0, SD8.energy / SD8.maxEnergy * 100) + "%";
+    }
+
+    if (power) {
+        var active = [];
+
+        if (SD8.shield > 0) active.push("🛡️ Perisai");
+        if (SD8.speedBoost > 0) active.push("⚡ Laju");
+        if (SD8.magnet > 0) active.push("💎 Magnet");
+        if (SD8.invincible > 0) active.push("⭐ Kebal");
+
+        power.textContent =
+            active.length ? active.join(" · ") : "Tiada kuasa";
+    }
+}
+
+/* 3. TAMBAH KESIHATAN */
+
+function SD8Heal(amount) {
+    SD8.health = Math.min(
+        SD8.maxHealth,
+        SD8.health + (amount || 20)
+    );
+
+    SD8UpdatePanel();
+    SD3Audio.collect();
+}
+
+/* 4. KURANGKAN KESIHATAN */
+
+function SD8Damage(amount) {
+    if (SD8.invincible > 0) return;
+    if (SD8.shield > 0) {
+        SD8.shield = 0;
+        SD8UpdatePanel();
+        return;
+    }
+
+    SD8.health -= amount || 10;
+    SD8.lastDamage = Date.now();
+
+    if (SD8.health <= 0) {
+        SD8.health = 0;
+
+        if (typeof gameOver === "function") {
+            gameOver();
+        }
+    }
+
+    SD8UpdatePanel();
+    SD3Audio.hit();
+}
+
+/* 5. TENAGA */
+
+function SD8UseEnergy(amount) {
+    amount = amount || 10;
+
+    if (SD8.energy < amount) return false;
+
+    SD8.energy -= amount;
+    SD8UpdatePanel();
+
+    return true;
+}
+
+function SD8RecoverEnergy(amount) {
+    SD8.energy = Math.min(
+        SD8.maxEnergy,
+        SD8.energy + (amount || 5)
+    );
+
+    SD8UpdatePanel();
+}
+
+/* 6. POWER-UP */
+
+function SD8Activate(type, duration) {
+    duration = duration || 600;
+
+    if (type === "shield") {
+        SD8.shield = duration;
+    }
+
+    if (type === "speed") {
+        SD8.speedBoost = duration;
+    }
+
+    if (type === "magnet") {
+        SD8.magnet = duration;
+    }
+
+    if (type === "invincible") {
+        SD8.invincible = duration;
+    }
+
+    SD8UpdatePanel();
+    SD3Audio.collect();
+
+    if (typeof showNotification === "function") {
+        showNotification("KUASA AKTIF: " + type.toUpperCase());
+    }
+}
+
+/* 7. KIRAAN MASA POWER-UP */
+
+function SD8UpdatePowers() {
+    if (SD8.shield > 0) SD8.shield--;
+    if (SD8.speedBoost > 0) SD8.speedBoost--;
+    if (SD8.magnet > 0) SD8.magnet--;
+    if (SD8.invincible > 0) SD8.invincible--;
+
+    SD8.energy = Math.min(
+        SD8.maxEnergy,
+        SD8.energy + 0.025
+    );
+
+    SD8UpdatePanel();
+}
+
+/* 8. ITEM DI DUNIA */
+
+function SD8CreateItems() {
+    SD8.items = [];
+
+    var types = [
+        "health",
+        "energy",
+        "shield",
+        "speed",
+        "magnet",
+        "invincible"
+    ];
+
+    for (var i = 0; i < 30; i++) {
+        SD8.items.push({
+            x: 400 + i * 550,
+            y: 180 + Math.random() * 160,
+            type: types[i % types.length],
+            collected: false,
+            size: 22,
+            phase: Math.random() * 6
+        });
+    }
+}
+
+/* 9. LUKIS ITEM */
+
+function SD8DrawItems() {
+    if (typeof ctx === "undefined") return;
+
+    var camera = typeof cameraX !== "undefined"
+        ? cameraX
+        : 0;
+
+    var icons = {
+        health: "❤️",
+        energy: "⚡",
+        shield: "🛡️",
+        speed: "🏃",
+        magnet: "💎",
+        invincible: "⭐"
+    };
+
+    ctx.save();
+    ctx.font = "24px Arial";
+    ctx.textAlign = "center";
+
+    for (var i = 0; i < SD8.items.length; i++) {
+        var item = SD8.items[i];
+
+        if (item.collected) continue;
+
+        var x = item.x - camera;
+        var y = item.y + Math.sin(Date.now() / 300 + item.phase) * 5;
+
+        if (x < -50 || x > canvas.width + 50) continue;
+
+        ctx.fillText(icons[item.type], x, y);
+    }
+
+    ctx.restore();
+}
+
+/* 10. KUTIP ITEM */
+
+function SD8CollectItems() {
+    if (typeof player === "undefined") return;
+
+    for (var i = 0; i < SD8.items.length; i++) {
+        var item = SD8.items[i];
+
+        if (item.collected) continue;
+
+        var dx = Math.abs(player.x - item.x);
+        var dy = Math.abs(player.y - item.y);
+
+        var range = SD8.magnet > 0 ? 100 : 38;
+
+        if (dx < range && dy < 90) {
+            item.collected = true;
+
+            if (item.type === "health") {
+                SD8Heal(25);
+            } else if (item.type === "energy") {
+                SD8RecoverEnergy(35);
+            } else if (item.type === "shield") {
+                SD8Activate("shield");
+            } else if (item.type === "speed") {
+                SD8Activate("speed");
+            } else if (item.type === "magnet") {
+                SD8Activate("magnet");
+            } else if (item.type === "invincible") {
+                SD8Activate("invincible");
+            }
+
+            if (typeof showNotification === "function") {
+                showNotification("ITEM DIKUTIP!");
+            }
+        }
+    }
+}
+
+/* 11. MULAKAN ITEM */
+
+SD8CreateItems();
+
+/* 12. SAMBUNGAN LOOP */
+
+var SD8PreviousGameLoop = gameLoop;
+
+gameLoop = function (timestamp) {
+    if (!SD3.paused && !SD3.won) {
+        SD8UpdatePowers();
+        SD8CollectItems();
+    }
+
+    SD8PreviousGameLoop(timestamp);
+};
+
+/* 13. SAMBUNGAN RENDER */
+
+var SD8PreviousRenderGame = renderGame;
+
+renderGame = function () {
+    SD8PreviousRenderGame();
+    SD8DrawItems();
+};
+
+/* 14. RESET STATUS */
+
+function SD8Reset() {
+    SD8.health = SD8.maxHealth;
+    SD8.energy = SD8.maxEnergy;
+
+    SD8.shield = 0;
+    SD8.speedBoost = 0;
+    SD8.magnet = 0;
+    SD8.invincible = 0;
+
+    SD8CreateItems();
+    SD8UpdatePanel();
+}
+
+/* 15. PAPAR STATUS */
+
+SD8UpdatePanel();
+
+console.log("BAHAGIAN 8 AKTIF");
+console.log("Sistem item dan power-up dimuatkan");
+
+/* 16. TAMAT BAHAGIAN 8 */
+
+/* =====================================================
+   BAHAGIAN 9 — SISTEM MUSUH DAN PERTARUNGAN
+===================================================== */
+
+var SD9 = {
+    enemies: [],
+    defeated: 0,
+    total: 30,
+    spawnDistance: 480,
+    damageCooldown: 0,
+    enemyTypes: [
+        {
+            name: "DURIAN KECIL",
+            color: "#648d2c",
+            hp: 2,
+            speed: 1.1,
+            damage: 5,
+            points: 20,
+            size: 42
+        },
+        {
+            name: "DURIAN GANAS",
+            color: "#b68a25",
+            hp: 4,
+            speed: 1.7,
+            damage: 10,
+            points: 40,
+            size: 55
+        },
+        {
+            name: "DURIAN BESAR",
+            color: "#8d4520",
+            hp: 7,
+            speed: 1.2,
+            damage: 15,
+            points: 80,
+            size: 70
+        }
+    ]
+};
+
+/* 1. JANA MUSUH */
+
+function SD9CreateEnemies() {
+    SD9.enemies = [];
+
+    for (var i = 0; i < SD9.total; i++) {
+        var type = SD9.enemyTypes[i % 3];
+
+        SD9.enemies.push({
+            x: 650 + i * SD9.spawnDistance,
+            y: 0,
+            hp: type.hp,
+            maxHp: type.hp,
+            speed: type.speed,
+            damage: type.damage,
+            points: type.points,
+            size: type.size,
+            color: type.color,
+            direction: -1,
+            alive: true,
+            attackTimer: 0,
+            flash: 0
+        });
+    }
+}
+
+/* 2. LUKIS MUSUH */
+
+function SD9DrawEnemy(enemy) {
+    if (typeof ctx === "undefined") return;
+
+    var camera = typeof cameraX !== "undefined"
+        ? cameraX
+        : 0;
+
+    var x = enemy.x - camera;
+    var y = canvas.height - 35 - enemy.size;
+
+    if (x < -100 || x > canvas.width + 100) return;
+
+    ctx.save();
+
+    ctx.fillStyle = enemy.flash > 0
+        ? "#ffffff"
+        : enemy.color;
+
+    ctx.beginPath();
+    ctx.arc(
+        x + enemy.size / 2,
+        y + enemy.size / 2,
+        enemy.size / 2,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
+
+    /* Duri */
+    ctx.strokeStyle = "#304b18";
+    ctx.lineWidth = 4;
+
+    for (var i = 0; i < 12; i++) {
+        var angle = i * Math.PI / 6;
+
+        var sx = x + enemy.size / 2 +
+            Math.cos(angle) * enemy.size * 0.35;
+
+        var sy = y + enemy.size / 2 +
+            Math.sin(angle) * enemy.size * 0.35;
+
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(
+            sx + Math.cos(angle) * 12,
+            sy + Math.sin(angle) * 12
+        );
+        ctx.stroke();
+    }
+
+    /* Mata */
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(x + enemy.size * 0.35, y + enemy.size * 0.4, 5, 0, Math.PI * 2);
+    ctx.arc(x + enemy.size * 0.65, y + enemy.size * 0.4, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#111";
+    ctx.beginPath();
+    ctx.arc(x + enemy.size * 0.35, y + enemy.size * 0.4, 2, 0, Math.PI * 2);
+    ctx.arc(x + enemy.size * 0.65, y + enemy.size * 0.4, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Bar kesihatan */
+    ctx.fillStyle = "#222";
+    ctx.fillRect(x, y - 12, enemy.size, 5);
+
+    ctx.fillStyle = "#e53935";
+    ctx.fillRect(
+        x,
+        y - 12,
+        enemy.size * (enemy.hp / enemy.maxHp),
+        5
+    );
+
+    ctx.restore();
+}
+
+/* 3. KEMAS KINI MUSUH */
+
+function SD9UpdateEnemies() {
+    if (typeof player === "undefined") return;
+
+    for (var i = 0; i < SD9.enemies.length; i++) {
+        var enemy = SD9.enemies[i];
+
+        if (!enemy.alive) continue;
+
+        var distance = player.x - enemy.x;
+
+        if (Math.abs(distance) < 400) {
+            enemy.x += distance > 0
+                ? enemy.speed
+                : -enemy.speed;
+        }
+
+        if (enemy.flash > 0) enemy.flash--;
+
+        enemy.attackTimer++;
+
+        if (Math.abs(distance) < 48 &&
+            enemy.attackTimer > 90) {
+            enemy.attackTimer = 0;
+
+            SD8Damage(enemy.damage);
+        }
+    }
+}
+
+/* 4. SERANG MUSUH */
+
+function SD9DamageEnemy(enemy, damage) {
+    if (!enemy || !enemy.alive) return;
+
+    enemy.hp -= damage || 1;
+    enemy.flash = 6;
+
+    SD3Audio.hit();
+
+    if (enemy.hp <= 0) {
+        enemy.alive = false;
+        SD9.defeated++;
+
+        if (typeof score !== "undefined") {
+            score += enemy.points;
+        }
+
+        if (typeof updateHUD === "function") {
+            updateHUD();
+        }
+
+        SD3Audio.collect();
+
+        if (typeof showNotification === "function") {
+            showNotification(
+                "MUSUH DIKALAHKAN! +" + enemy.points + " MATA"
+            );
+        }
+
+        SD7AddProgress(1);
+    }
+}
+
+/* 5. SERANGAN PEMAIN */
+
+function SD9PlayerAttack() {
+    if (typeof player === "undefined") return;
+
+    var attacking = player.attacking || player.isAttacking;
+
+    if (!attacking) return;
+
+    if (SD9.damageCooldown > 0) {
+        SD9.damageCooldown--;
+        return;
+    }
+
+    SD9.damageCooldown = 20;
+
+    for (var i = 0; i < SD9.enemies.length; i++) {
+        var enemy = SD9.enemies[i];
+
+        if (!enemy.alive) continue;
+
+        if (Math.abs(player.x - enemy.x) < 100) {
+            SD9DamageEnemy(enemy, 1);
+        }
+    }
+}
+
+/* 6. SERANGAN PELURU */
+
+function SD9ProjectileAttack() {
+    if (typeof projectiles === "undefined") return;
+
+    for (var i = 0; i < projectiles.length; i++) {
+        var bullet = projectiles[i];
+
+        if (!bullet) continue;
+
+        for (var j = 0; j < SD9.enemies.length; j++) {
+            var enemy = SD9.enemies[j];
+
+            if (!enemy.alive) continue;
+
+            if (
+                Math.abs(bullet.x - enemy.x) < enemy.size &&
+                Math.abs(
+                    bullet.y -
+                    (canvas.height - 35 - enemy.size / 2)
+                ) < enemy.size
+            ) {
+                SD9DamageEnemy(enemy, 1);
+
+                bullet.x = -9999;
+                bullet.y = -9999;
+
+                break;
+            }
+        }
+    }
+}
+
+/* 7. PAPAR SEMUA MUSUH */
+
+function SD9DrawEnemies() {
+    for (var i = 0; i < SD9.enemies.length; i++) {
+        if (SD9.enemies[i].alive) {
+            SD9DrawEnemy(SD9.enemies[i]);
+        }
+    }
+}
+
+/* 8. PAPARAN BILANGAN MUSUH */
+
+var SD9Panel = document.createElement("div");
+
+SD9Panel.style.cssText =
+    "position:fixed;right:10px;bottom:165px;" +
+    "z-index:1500;background:rgba(0,0,0,.7);" +
+    "padding:8px 11px;border-radius:10px;" +
+    "color:white;font:12px Arial;pointer-events:none;";
+
+SD9Panel.innerHTML =
+    "👾 MUSUH: <b id='sd9-count'>0</b>";
+
+document.body.appendChild(SD9Panel);
+
+function SD9UpdatePanel() {
+    var el = document.getElementById("sd9-count");
+
+    if (el) {
+        el.textContent = SD9.defeated;
+    }
+}
+
+/* 9. RESET MUSUH */
+
+function SD9Reset() {
+    SD9.defeated = 0;
+    SD9.damageCooldown = 0;
+
+    SD9CreateEnemies();
+    SD9UpdatePanel();
+}
+
+/* 10. MULAKAN MUSUH */
+
+SD9CreateEnemies();
+
+/* 11. SAMBUNGAN GAME LOOP */
+
+var SD9PreviousGameLoop = gameLoop;
+
+gameLoop = function (timestamp) {
+    if (!SD3.paused && !SD3.won) {
+        SD9UpdateEnemies();
+        SD9PlayerAttack();
+        SD9ProjectileAttack();
+        SD9UpdatePanel();
+    }
+
+    SD9PreviousGameLoop(timestamp);
+};
+
+/* 12. SAMBUNGAN PAPARAN */
+
+var SD9PreviousRenderGame = renderGame;
+
+renderGame = function () {
+    SD9PreviousRenderGame();
+    SD9DrawEnemies();
+};
+
+/* 13. STATUS */
+
+console.log("BAHAGIAN 9 AKTIF");
+console.log("Jumlah musuh:", SD9.total);
+
+/* 14. TAMAT BAHAGIAN 9 */
+
+/* =====================================================
+   BAHAGIAN 10 — SENJATA DAN LETUPAN
+===================================================== */
+
+var SD10 = {
+    bullets: [],
+    explosions: [],
+    ammo: 100,
+    maxAmmo: 100,
+    cooldown: 0,
+    reloadTime: 0,
+    bulletSpeed: 11,
+    bulletDamage: 2,
+    firing: false
+};
+
+/* 1. KAWALAN SENJATA */
+
+var SD10Button = document.createElement("button");
+
+SD10Button.innerHTML = "🔫 TEMBAK";
+
+SD10Button.style.cssText =
+    "position:fixed;right:20px;bottom:95px;" +
+    "z-index:3000;width:76px;height:65px;" +
+    "border:2px solid rgba(255,255,255,.5);" +
+    "border-radius:50%;background:rgba(180,40,20,.65);" +
+    "color:white;font-weight:bold;font-size:12px;" +
+    "touch-action:none;";
+
+document.body.appendChild(SD10Button);
+
+SD10Button.addEventListener("pointerdown", function (e) {
+    e.preventDefault();
+    SD10.firing = true;
+    SD10Shoot();
+});
+
+SD10Button.addEventListener("pointerup", function () {
+    SD10.firing = false;
+});
+
+SD10Button.addEventListener("pointerleave", function () {
+    SD10.firing = false;
+});
+
+SD10Button.addEventListener("pointercancel", function () {
+    SD10.firing = false;
+});
+
+/* 2. HASILKAN PELURU */
+
+function SD10Shoot() {
+    if (SD10.cooldown > 0) return;
+    if (SD10.ammo <= 0) return;
+    if (typeof player === "undefined") return;
+
+    SD10.cooldown = 12;
+    SD10.ammo--;
+
+    var direction = player.facing || 1;
+
+    SD10.bullets.push({
+        x: player.x + 25 * direction,
+        y: player.y + 30,
+        vx: SD10.bulletSpeed * direction,
+        life: 100,
+        damage: SD10.bulletDamage
+    });
+
+    SD3Audio.shoot();
+}
+
+/* 3. KEMAS KINI PELURU */
+
+function SD10UpdateBullets() {
+    for (var i = SD10.bullets.length - 1; i >= 0; i--) {
+        var b = SD10.bullets[i];
+
+        b.x += b.vx;
+        b.life--;
+
+        if (b.life <= 0 ||
+            b.x < 0 ||
+            b.x > 30000) {
+            SD10.bullets.splice(i, 1);
+        }
+    }
+}
+
+/* 4. LUKIS PELURU */
+
+function SD10DrawBullets() {
+    if (typeof ctx === "undefined") return;
+
+    var cam = typeof cameraX !== "undefined"
+        ? cameraX
+        : 0;
+
+    ctx.save();
+
+    for (var i = 0; i < SD10.bullets.length; i++) {
+        var b = SD10.bullets[i];
+        var x = b.x - cam;
+
+        ctx.fillStyle = "#ffe66d";
+        ctx.shadowColor = "#ff9800";
+        ctx.shadowBlur = 12;
+
+        ctx.beginPath();
+        ctx.arc(x, b.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.restore();
+}
+
+/* 5. LETUPAN */
+
+function SD10Explosion(x, y) {
+    for (var i = 0; i < 18; i++) {
+        var angle = Math.random() * Math.PI * 2;
+        var speed = 2 + Math.random() * 5;
+
+        SD10.explosions.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 30,
+            size: 2 + Math.random() * 5
+        });
+    }
+}
+
+/* 6. KEMAS KINI LETUPAN */
+
+function SD10UpdateExplosions() {
+    for (var i = SD10.explosions.length - 1; i >= 0; i--) {
+        var p = SD10.explosions[i];
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.15;
+        p.life--;
+
+        if (p.life <= 0) {
+            SD10.explosions.splice(i, 1);
+        }
+    }
+}
+
+/* 7. LUKIS LETUPAN */
+
+function SD10DrawExplosions() {
+    if (typeof ctx === "undefined") return;
+
+    var cam = typeof cameraX !== "undefined"
+        ? cameraX
+        : 0;
+
+    ctx.save();
+
+    for (var i = 0; i < SD10.explosions.length; i++) {
+        var p = SD10.explosions[i];
+
+        ctx.globalAlpha = Math.max(0, p.life / 30);
+        ctx.fillStyle = "#ffb300";
+
+        ctx.beginPath();
+        ctx.arc(
+            p.x - cam,
+            p.y,
+            p.size,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.restore();
+}
+
+/* 8. KESAN PELURU PADA MUSUH */
+
+function SD10BulletCollision() {
+    if (typeof SD9 === "undefined") return;
+
+    for (var i = SD10.bullets.length - 1; i >= 0; i--) {
+        var bullet = SD10.bullets[i];
+
+        for (var j = 0; j < SD9.enemies.length; j++) {
+            var enemy = SD9.enemies[j];
+
+            if (!enemy.alive) continue;
+
+            var enemyY = canvas.height - 35 - enemy.size / 2;
+
+            if (
+                Math.abs(bullet.x - enemy.x) < enemy.size / 2 &&
+                Math.abs(bullet.y - enemyY) < enemy.size / 2
+            ) {
+                SD9DamageEnemy(enemy, bullet.damage);
+
+                SD10Explosion(bullet.x, bullet.y);
+
+                SD10.bullets.splice(i, 1);
+                break;
+            }
+        }
+    }
+}
+
+/* 9. ISI SEMULA PELURU */
+
+function SD10Reload() {
+    if (SD10.reloadTime > 0) return;
+
+    SD10.reloadTime = 90;
+
+    setTimeout(function () {
+        SD10.ammo = SD10.maxAmmo;
+        SD10.reloadTime = 0;
+    }, 1500);
+}
+
+/* 10. PAPAR MAKLUMAT PELURU */
+
+var SD10AmmoPanel = document.createElement("div");
+
+SD10AmmoPanel.style.cssText =
+    "position:fixed;right:15px;bottom:75px;" +
+    "z-index:3001;color:white;" +
+    "background:rgba(0,0,0,.7);" +
+    "padding:6px 10px;border-radius:8px;" +
+    "font:bold 13px Arial;pointer-events:none;";
+
+document.body.appendChild(SD10AmmoPanel);
+
+function SD10UpdateAmmoPanel() {
+    SD10AmmoPanel.textContent =
+        "🔫 PELURU " + SD10.ammo + "/" + SD10.maxAmmo;
+}
+
+/* 11. BUTANG ISI SEMULA */
+
+var SD10ReloadButton = document.createElement("button");
+
+SD10ReloadButton.textContent = "ISI SEMULA";
+
+SD10ReloadButton.style.cssText =
+    "position:fixed;right:18px;bottom:165px;" +
+    "z-index:3000;background:rgba(20,80,140,.8);" +
+    "color:white;border:1px solid white;" +
+    "border-radius:10px;padding:9px;font-size:11px;";
+
+SD10ReloadButton.onclick = SD10Reload;
+
+document.body.appendChild(SD10ReloadButton);
+
+/* 12. RESET */
+
+function SD10Reset() {
+    SD10.bullets = [];
+    SD10.explosions = [];
+    SD10.ammo = SD10.maxAmmo;
+    SD10.cooldown = 0;
+    SD10.firing = false;
+
+    SD10UpdateAmmoPanel();
+}
+
+/* 13. SAMBUNGAN GAME LOOP */
+
+var SD10PreviousGameLoop = gameLoop;
+
+gameLoop = function (timestamp) {
+    if (!SD3.paused && !SD3.won) {
+        if (SD10.cooldown > 0) SD10.cooldown--;
+
+        if (SD10.firing && SD10.cooldown <= 0) {
+            SD10Shoot();
+        }
+
+        SD10UpdateBullets();
+        SD10BulletCollision();
+        SD10UpdateExplosions();
+        SD10UpdateAmmoPanel();
+    }
+
+    SD10PreviousGameLoop(timestamp);
+};
+
+/* 14. SAMBUNGAN PAPARAN */
+
+var SD10PreviousRenderGame = renderGame;
+
+renderGame = function () {
+    SD10PreviousRenderGame();
+
+    SD10DrawBullets();
+    SD10DrawExplosions();
+};
+
+/* 15. STATUS */
+
+SD10UpdateAmmoPanel();
+
+console.log("BAHAGIAN 10 AKTIF");
+
+/* =====================================================
+   BAHAGIAN 11 — MISI DAN GANJARAN AUTOMATIK
+===================================================== */
+
+var SD11 = {
+    missionsCompleted: 0,
+    bonusOpened: 0,
+    itemsCollected: 0,
+    enemiesDefeated: 0,
+    rewardsEarned: 0,
+    events: [],
+    maxEvents: 8
+};
+
+/* 1. REKOD AKTIVITI */
+
+function SD11RecordEvent(title, points) {
+    var event = {
+        title: title,
+        points: points || 0,
+        time: Date.now()
+    };
+
+    SD11.events.unshift(event);
+
+    if (SD11.events.length > SD11.maxEvents) {
+        SD11.events.pop();
+    }
+
+    SD11.rewardsEarned += points || 0;
+
+    SD11UpdatePanel();
+}
+
+/* 2. PAPARAN STATUS MISI */
+
+var SD11Panel = document.createElement("div");
+
+SD11Panel.id = "sd11-panel";
+
+SD11Panel.style.cssText =
+    "position:fixed;left:10px;top:105px;" +
+    "z-index:1600;background:rgba(0,0,0,.78);" +
+    "color:white;padding:9px 12px;" +
+    "border-radius:12px;font:12px Arial;" +
+    "min-width:135px;pointer-events:none;";
+
+document.body.appendChild(SD11Panel);
+
+function SD11UpdatePanel() {
+    SD11Panel.innerHTML =
+        "<b>🏆 REKOD PENGEMBARAAN</b><br>" +
+        "👾 Musuh: " + SD11.enemiesDefeated + "<br>" +
+        "🎁 Bonus: " + SD11.bonusOpened + "<br>" +
+        "💎 Item: " + SD11.itemsCollected + "<br>" +
+        "⭐ Ganjaran: " + SD11.rewardsEarned;
+}
+
+/* 3. REKOD MUSUH DIKALAHKAN */
+
+function SD11EnemyDefeated(points) {
+    SD11.enemiesDefeated++;
+
+    SD11RecordEvent(
+        "Musuh berjaya dikalahkan",
+        points || 0
+    );
+}
+
+/* 4. REKOD KOTAK BONUS */
+
+function SD11BonusOpened(points) {
+    SD11.bonusOpened++;
+
+    SD11RecordEvent(
+        "Kotak bonus dibuka",
+        points || 0
+    );
+}
+
+/* 5. REKOD ITEM DIKUTIP */
+
+function SD11ItemCollected(points) {
+    SD11.itemsCollected++;
+
+    SD11RecordEvent(
+        "Item berjaya dikutip",
+        points || 0
+    );
+}
+
+/* 6. REKOD MISI SELESAI */
+
+function SD11MissionCompleted(title, points) {
+    SD11.missionsCompleted++;
+
+    SD11RecordEvent(
+        "Misi selesai: " + title,
+        points || 0
+    );
+
+    if (typeof showNotification === "function") {
+        showNotification("MISI SELESAI: " + title);
+    }
+}
+
+/* 7. SAMBUNGAN GANJARAN MUSUH */
+
+if (typeof SD9DamageEnemy === "function") {
+    var SD11OldDamageEnemy = SD9DamageEnemy;
+
+    SD9DamageEnemy = function (enemy, damage) {
+        if (!enemy || !enemy.alive) return;
+
+        var wasAlive = enemy.alive;
+
+        SD11OldDamageEnemy(enemy, damage);
+
+        if (wasAlive && !enemy.alive) {
+            SD11EnemyDefeated(enemy.points);
+        }
+    };
+}
+
+/* 8. SAMBUNGAN KOTAK BONUS */
+
+if (typeof SD5OpenReward === "function") {
+    var SD11OldOpenReward = SD5OpenReward;
+
+    SD5OpenReward = function (index) {
+        var before = SD5.opened
+            ? SD5.opened[index]
+            : false;
+
+        SD11OldOpenReward(index);
+
+        var after = SD5.opened
+            ? SD5.opened[index]
+            : false;
+
+        if (!before && after) {
+            SD11BonusOpened(100);
+        }
+    };
+}
+
+/* 9. SAMBUNGAN ITEM */
+
+if (typeof SD8CollectItems === "function") {
+    var SD11OldCollectItems = SD8CollectItems;
+
+    SD8CollectItems = function () {
+        var before = SD8.itemsCollected || 0;
+
+        SD11OldCollectItems();
+
+        var after = SD8.itemsCollected || 0;
+
+        var difference = after - before;
+
+        if (difference > 0) {
+            for (var i = 0; i < difference; i++) {
+                SD11ItemCollected(10);
+            }
+        }
+    };
+}
+
+/* 10. SIMPAN REKOD */
+
+function SD11Save() {
+    try {
+        localStorage.setItem(
+            "SUPER_DURIAN_SD11",
+            JSON.stringify(SD11)
+        );
+    } catch (error) {
+        console.warn("Rekod tidak dapat disimpan", error);
+    }
+}
+
+/* 11. BACA REKOD */
+
+function SD11Load() {
+    try {
+        var saved = localStorage.getItem(
+            "SUPER_DURIAN_SD11"
+        );
+
+        if (!saved) return;
+
+        var data = JSON.parse(saved);
+
+        SD11.missionsCompleted = data.missionsCompleted || 0;
+        SD11.bonusOpened = data.bonusOpened || 0;
+        SD11.itemsCollected = data.itemsCollected || 0;
+        SD11.enemiesDefeated = data.enemiesDefeated || 0;
+        SD11.rewardsEarned = data.rewardsEarned || 0;
+        SD11.events = Array.isArray(data.events)
+            ? data.events
+            : [];
+    } catch (error) {
+        console.warn("Rekod gagal dibaca", error);
+    }
+
+    SD11UpdatePanel();
+}
+
+/* 12. SIMPAN SECARA BERKALA */
+
+var SD11SaveCounter = 0;
+
+var SD11PreviousGameLoop = gameLoop;
+
+gameLoop = function (timestamp) {
+    SD11PreviousGameLoop(timestamp);
+
+    SD11SaveCounter++;
+
+    if (SD11SaveCounter >= 300) {
+        SD11SaveCounter = 0;
+        SD11Save();
+    }
+};
+
+/* 13. RESET REKOD */
+
+function SD11Reset() {
+    SD11.missionsCompleted = 0;
+    SD11.bonusOpened = 0;
+    SD11.itemsCollected = 0;
+    SD11.enemiesDefeated = 0;
+    SD11.rewardsEarned = 0;
+    SD11.events = [];
+
+    SD11Save();
+    SD11UpdatePanel();
+}
+
+/* 14. MULAKAN SISTEM */
+
+SD11Load();
+SD11UpdatePanel();
+
+console.log("BAHAGIAN 11 AKTIF");
+
+/* =====================================================
+   BAHAGIAN 12 — KEDAI DAN NAIK TARAF WATAK
+===================================================== */
+
+var SD12 = {
+    coins: 0,
+    upgrades: {
+        health: 0,
+        speed: 0,
+        damage: 0,
+        ammo: 0
+    },
+    prices: {
+        health: 100,
+        speed: 150,
+        damage: 200,
+        ammo: 80
+    }
+};
+
+/* 1. PAPARAN KEDAI */
+
+var SD12Shop = document.createElement("div");
+
+SD12Shop.id = "sd12-shop";
+
+SD12Shop.style.cssText =
+    "display:none;position:fixed;inset:0;z-index:8000;" +
+    "background:rgba(0,0,0,.92);color:white;" +
+    "font-family:Arial;overflow:auto;padding:20px;" +
+    "box-sizing:border-box;text-align:center;";
+
+document.body.appendChild(SD12Shop);
+
+/* 2. BINA KANDUNGAN KEDAI */
+
+function SD12BuildShop() {
+    SD12Shop.innerHTML = "";
+
+    var heading = document.createElement("h2");
+    heading.textContent = "🏪 KEDAI PENGEMBARA";
+    SD12Shop.appendChild(heading);
+
+    var balance = document.createElement("h3");
+    balance.id = "sd12-balance";
+    balance.textContent = "💎 Syiling: " + SD12.coins;
+    SD12Shop.appendChild(balance);
+
+    var items = [
+        ["health", "❤️ Tambah Nyawa", "100"],
+        ["speed", "⚡ Tambah Kelajuan", "150"],
+        ["damage", "💥 Tambah Kekuatan", "200"],
+        ["ammo", "🔫 Tambah Peluru", "80"]
+    ];
+
+    items.forEach(function (item) {
+        var button = document.createElement("button");
+
+        button.textContent =
+            item[1] + " — " +
+            SD12.prices[item[0]] + " syiling";
+
+        button.style.cssText =
+            "display:block;width:100%;max-width:320px;" +
+            "margin:12px auto;padding:15px;" +
+            "border:0;border-radius:12px;" +
+            "background:#e4a52d;color:#222;" +
+            "font-size:15px;font-weight:bold;";
+
+        button.onclick = function () {
+            SD12Buy(item[0]);
+        };
+
+        SD12Shop.appendChild(button);
+    });
+
+    var close = document.createElement("button");
+    close.textContent = "TUTUP KEDAI";
+
+    close.style.cssText =
+        "margin-top:20px;padding:14px 25px;" +
+        "background:#a52b2b;color:white;" +
+        "border:0;border-radius:10px;font-weight:bold;";
+
+    close.onclick = SD12CloseShop;
+
+    SD12Shop.appendChild(close);
+}
+
+/* 3. BUKA KEDAI */
+
+function SD12OpenShop() {
+    SD12BuildShop();
+    SD12Shop.style.display = "block";
+}
+
+/* 4. TUTUP KEDAI */
+
+function SD12CloseShop() {
+    SD12Shop.style.display = "none";
+}
+
+/* 5. BELI NAIK TARAF */
+
+function SD12Buy(type) {
+    var price = SD12.prices[type];
+
+    if (SD12.coins < price) {
+        alert("Syiling tidak mencukupi!");
+        return;
+    }
+
+    SD12.coins -= price;
+    SD12.upgrades[type]++;
+
+    if (type === "health") {
+        if (typeof SD8 !== "undefined") {
+            SD8.health = Math.min(
+                SD8.maxHealth,
+                SD8.health + 20
+            );
+        }
+    }
+
+    if (type === "speed") {
+        if (typeof player !== "undefined") {
+            player.speed = (player.speed || 4) + 0.5;
+        }
+    }
+
+    if (type === "damage") {
+        if (typeof SD10 !== "undefined") {
+            SD10.bulletDamage++;
+        }
+    }
+
+    if (type === "ammo") {
+        if (typeof SD10 !== "undefined") {
+            SD10.maxAmmo += 20;
+            SD10.ammo += 20;
+        }
+    }
+
+    SD12.prices[type] =
+        Math.floor(price * 1.5);
+
+    SD12Save();
+    SD12BuildShop();
+
+    if (typeof showNotification === "function") {
+        showNotification("NAIK TARAF BERJAYA!");
+    }
+}
+
+/* 6. TAMBAH SYILING */
+
+function SD12AddCoins(amount) {
+    SD12.coins += Math.max(0, amount || 0);
+    SD12Save();
+}
+
+/* 7. SIMPAN DATA */
+
+function SD12Save() {
+    try {
+        localStorage.setItem(
+            "SUPER_DURIAN_SD12",
+            JSON.stringify(SD12)
+        );
+    } catch (error) {
+        console.warn("Gagal simpan kedai", error);
+    }
+}
+
+/* 8. MUAT DATA */
+
+function SD12Load() {
+    try {
+        var data = localStorage.getItem(
+            "SUPER_DURIAN_SD12"
+        );
+
+        if (!data) return;
+
+        var saved = JSON.parse(data);
+
+        SD12.coins = saved.coins || 0;
+
+        if (saved.upgrades) {
+            Object.assign(SD12.upgrades, saved.upgrades);
+        }
+
+        if (saved.prices) {
+            Object.assign(SD12.prices, saved.prices);
+        }
+    } catch (error) {
+        console.warn("Data kedai gagal dimuat", error);
+    }
+}
+
+/* 9. BUTANG KEDAI */
+
+var SD12Button = document.createElement("button");
+
+SD12Button.textContent = "🏪 KEDAI";
+
+SD12Button.style.cssText =
+    "position:fixed;left:12px;bottom:12px;" +
+    "z-index:2500;padding:10px 14px;" +
+    "background:#d99b28;color:#222;" +
+    "border:2px solid white;border-radius:12px;" +
+    "font-weight:bold;";
+
+SD12Button.onclick = SD12OpenShop;
+
+document.body.appendChild(SD12Button);
+
+/* 10. GANJARAN SYILING DARIPADA MUSUH */
+
+if (typeof SD9DamageEnemy === "function") {
+    var SD12OldDamageEnemy = SD9DamageEnemy;
+
+    SD9DamageEnemy = function (enemy, damage) {
+        if (!enemy || !enemy.alive) return;
+
+        var wasAlive = enemy.alive;
+
+        SD12OldDamageEnemy(enemy, damage);
+
+        if (wasAlive && !enemy.alive) {
+            SD12AddCoins(10);
+        }
+    };
+}
+
+/* 11. PAPAR STATUS SYILING */
+
+var SD12CoinPanel = document.createElement("div");
+
+SD12CoinPanel.style.cssText =
+    "position:fixed;left:12px;top:75px;" +
+    "z-index:1600;background:rgba(0,0,0,.75);" +
+    "color:#ffd54f;padding:7px 11px;" +
+    "border-radius:9px;font:bold 13px Arial;" +
+    "pointer-events:none;";
+
+document.body.appendChild(SD12CoinPanel);
+
+function SD12UpdateCoins() {
+    SD12CoinPanel.textContent =
+        "💎 SYILING: " + SD12.coins;
+}
+
+/* 12. RESET */
+
+function SD12Reset() {
+    SD12.coins = 0;
+
+    SD12.upgrades = {
+        health: 0,
+        speed: 0,
+        damage: 0,
+        ammo: 0
+    };
+
+    SD12.prices = {
+        health: 100,
+        speed: 150,
+        damage: 200,
+        ammo: 80
+    };
+
+    SD12Save();
+    SD12UpdateCoins();
+}
+
+/* 13. SAMBUNGAN GAME LOOP */
+
+var SD12PreviousGameLoop = gameLoop;
+
+gameLoop = function (timestamp) {
+    SD12UpdateCoins();
+    SD12PreviousGameLoop(timestamp);
+};
+
+/* 14. MULAKAN */
+
+SD12Load();
+SD12UpdateCoins();
+
+console.log("BAHAGIAN 12 AKTIF");
+
+/* =====================================================
+   BAHAGIAN 13 — PETA 20 LOKASI
+===================================================== */
+
+var SD13 = {
+    currentLocation: 0,
+    unlocked: 1,
+    locations: [
+        "KAMPUNG HIJAU",
+        "KEBUN DURIAN",
+        "HUTAN RIMBA",
+        "SUNGAI JERNIH",
+        "KAMPUNG NELAYAN",
+        "PASAR DESA",
+        "TAMAN REKREASI",
+        "KAWASAN SEKOLAH",
+        "LADANG SAYUR",
+        "BUKIT HIJAU",
+        "KAWASAN MASJID",
+        "TAMAN BUNGA",
+        "HUTAN BULUH",
+        "DUNIA KITAR SEMULA",
+        "KAMPUNG DAMAI",
+        "GUNUNG BERAPI",
+        "GUA RAHSIA",
+        "ISTANA DURIAN",
+        "DUNIA BONUS",
+        "DUNIA JATIDIRI"
+    ]
+};
+
+/* 1. PAPARAN PETA */
+
+var SD13Map = document.createElement("div");
+
+SD13Map.style.cssText =
+    "display:none;position:fixed;inset:0;z-index:8500;" +
+    "background:rgba(4,20,25,.97);color:white;" +
+    "padding:16px;box-sizing:border-box;" +
+    "overflow:auto;font-family:Arial;text-align:center;";
+
+document.body.appendChild(SD13Map);
+
+/* 2. BINA PETA */
+
+function SD13BuildMap() {
+    SD13Map.innerHTML =
+        "<h2>🗺️ PETA PENGEMBARAAN</h2>" +
+        "<p>20 lokasi untuk diterokai</p>";
+
+    var grid = document.createElement("div");
+
+    grid.style.cssText =
+        "display:grid;grid-template-columns:repeat(2,minmax(0,1fr));" +
+        "gap:9px;max-width:600px;margin:auto;";
+
+    SD13.locations.forEach(function (name, index) {
+        var button = document.createElement("button");
+
+        var unlocked = index < SD13.unlocked;
+
+        button.textContent =
+            (unlocked ? "🌍 " : "🔒 ") +
+            (index + 1) + ". " + name;
+
+        button.style.cssText =
+            "min-height:65px;border:1px solid #8ba9a4;" +
+            "border-radius:10px;padding:8px;" +
+            "background:" +
+            (unlocked ? "#246b4b" : "#333") +
+            ";color:white;font-weight:bold;font-size:11px;";
+
+        button.disabled = !unlocked;
+
+        button.onclick = function () {
+            SD13SelectLocation(index);
+        };
+
+        grid.appendChild(button);
+    });
+
+    SD13Map.appendChild(grid);
+
+    var close = document.createElement("button");
+
+    close.textContent = "TUTUP PETA";
+
+    close.style.cssText =
+        "margin:20px;padding:13px 25px;" +
+        "background:#a83232;color:white;" +
+        "border:0;border-radius:10px;font-weight:bold;";
+
+    close.onclick = SD13CloseMap;
+
+    SD13Map.appendChild(close);
+}
+
+/* 3. BUKA PETA */
+
+function SD13OpenMap() {
+    SD13BuildMap();
+    SD13Map.style.display = "block";
+}
+
+/* 4. TUTUP PETA */
+
+function SD13CloseMap() {
+    SD13Map.style.display = "none";
+}
+
+/* 5. PILIH LOKASI */
+
+function SD13SelectLocation(index) {
+    if (index >= SD13.unlocked) return;
+
+    SD13.currentLocation = index;
+
+    SD13CloseMap();
+
+    if (typeof showNotification === "function") {
+        showNotification(
+            "LOKASI: " + SD13.locations[index]
+        );
+    }
+}
+
+/* 6. BUKA LOKASI SETERUSNYA */
+
+function SD13UnlockNext() {
+    if (SD13.unlocked >= 20) return;
+
+    SD13.unlocked++;
+
+    SD13Save();
+    SD13BuildMap();
+
+    if (typeof showNotification === "function") {
+        showNotification(
+            "LOKASI DIBUKA: " +
+            SD13.locations[SD13.unlocked - 1]
+        );
+    }
+}
+
+/* 7. SIMPAN PETA */
+
+function SD13Save() {
+    try {
+        localStorage.setItem(
+            "SUPER_DURIAN_SD13",
+            JSON.stringify(SD13)
+        );
+    } catch (error) {
+        console.warn("Peta gagal disimpan", error);
+    }
+}
+
+/* 8. MUAT PETA */
+
+function SD13Load() {
+    try {
+        var saved = localStorage.getItem(
+            "SUPER_DURIAN_SD13"
+        );
+
+        if (!saved) return;
+
+        var data = JSON.parse(saved);
+
+        SD13.currentLocation =
+            data.currentLocation || 0;
+
+        SD13.unlocked = Math.max(
+            1,
+            Math.min(20, data.unlocked || 1)
+        );
+    } catch (error) {
+        console.warn("Peta gagal dimuat", error);
+    }
+}
+
+/* 9. BUTANG PETA */
+
+var SD13Button = document.createElement("button");
+
+SD13Button.textContent = "🗺️ PETA";
+
+SD13Button.style.cssText =
+    "position:fixed;left:12px;bottom:65px;" +
+    "z-index:2500;padding:10px 14px;" +
+    "background:#246b4b;color:white;" +
+    "border:2px solid white;border-radius:12px;" +
+    "font-weight:bold;";
+
+SD13Button.onclick = SD13OpenMap;
+
+document.body.appendChild(SD13Button);
+
+/* 10. RESET PETA */
+
+function SD13Reset() {
+    SD13.currentLocation = 0;
+    SD13.unlocked = 1;
+
+    SD13Save();
+    SD13BuildMap();
+}
+
+/* 11. MULAKAN */
+
+SD13Load();
+
+console.log("BAHAGIAN 13 AKTIF");
+console.log("Jumlah lokasi:", SD13.locations.length);
+
+/* =====================================================
+   BAHAGIAN 14 — SISTEM PENCAPAIAN DAN TROFI
+===================================================== */
+
+var SD14 = {
+    achievements: [
+        {name:"Pengembara Baharu", desc:"Mulakan permainan", target:1},
+        {name:"Pemburu Durian", desc:"Kalahkan 5 musuh", target:5},
+        {name:"Pemburu Hebat", desc:"Kalahkan 10 musuh", target:10},
+        {name:"Wira Durian", desc:"Kalahkan 20 musuh", target:20},
+        {name:"Penyelamat Alam", desc:"Kutip 10 item", target:10},
+        {name:"Pencinta Alam", desc:"Kutip 20 item", target:20},
+        {name:"Pembuka Bonus", desc:"Buka 3 kotak bonus", target:3},
+        {name:"Pengumpul Bonus", desc:"Buka 10 kotak bonus", target:10},
+        {name:"Pakar Bonus", desc:"Buka 20 kotak bonus", target:20},
+        {name:"Pengumpul Syiling", desc:"Kumpul 100 syiling", target:100},
+        {name:"Jutawan Kecil", desc:"Kumpul 500 syiling", target:500},
+        {name:"Pembeli Bijak", desc:"Beli 3 naik taraf", target:3},
+        {name:"Penjelajah", desc:"Buka 5 lokasi", target:5},
+        {name:"Pengembara Dunia", desc:"Buka 10 lokasi", target:10},
+        {name:"Penakluk Dunia", desc:"Buka 20 lokasi", target:20},
+        {name:"Pejuang", desc:"Kalahkan Raja Durian", target:1},
+        {name:"Penjaga Nyawa", desc:"Gunakan rawatan", target:1},
+        {name:"Pakar Senjata", desc:"Gunakan 50 peluru", target:50},
+        {name:"Penyempurna Misi", desc:"Selesaikan 10 misi", target:10},
+        {name:"Wira Jatidiri", desc:"Lengkapkan semua pencapaian", target:20}
+    ],
+    unlocked: [],
+    stats: {
+        enemies: 0,
+        items: 0,
+        bonuses: 0,
+        coins: 0,
+        purchases: 0,
+        bullets: 0,
+        missions: 0,
+        locations: 1,
+        boss: 0,
+        healing: 0
+    }
+};
+
+/* 1. SIMPAN PENCAPAIAN */
+
+function SD14Save() {
+    try {
+        localStorage.setItem(
+            "SUPER_DURIAN_SD14",
+            JSON.stringify(SD14)
+        );
+    } catch (error) {
+        console.warn("Pencapaian gagal disimpan", error);
+    }
+}
+
+/* 2. MUAT PENCAPAIAN */
+
+function SD14Load() {
+    try {
+        var saved = localStorage.getItem(
+            "SUPER_DURIAN_SD14"
+        );
+
+        if (!saved) return;
+
+        var data = JSON.parse(saved);
+
+        SD14.unlocked = Array.isArray(data.unlocked)
+            ? data.unlocked
+            : [];
+
+        if (data.stats) {
+            Object.assign(SD14.stats, data.stats);
+        }
+    } catch (error) {
+        console.warn("Pencapaian gagal dimuat", error);
+    }
+}
+
+/* 3. SEMAK PENCAPAIAN */
+
+function SD14Check() {
+    var s = SD14.stats;
+
+    var values = [
+        1,
+        s.enemies,
+        s.enemies,
+        s.enemies,
+        s.items,
+        s.items,
+        s.bonuses,
+        s.bonuses,
+        s.bonuses,
+        s.coins,
+        s.coins,
+        s.purchases,
+        s.locations,
+        s.locations,
+        s.locations,
+        s.boss,
+        s.healing,
+        s.bullets,
+        s.missions,
+        SD14.unlocked.length
+    ];
+
+    SD14.achievements.forEach(function (achievement, index) {
+        if (SD14.unlocked.includes(index)) return;
+
+        if (values[index] >= achievement.target) {
+            SD14.unlocked.push(index);
+
+            if (typeof showNotification === "function") {
+                showNotification(
+                    "🏆 TROFI: " + achievement.name
+                );
+            }
+
+            if (typeof SD12AddCoins === "function") {
+                SD12AddCoins(20);
+            }
+        }
+    });
+
+    SD14Save();
+    SD14UpdatePanel();
+}
+
+/* 4. KEMAS KINI STATISTIK */
+
+function SD14Add(stat, amount) {
+    if (!Object.prototype.hasOwnProperty.call(
+        SD14.stats,
+        stat
+    )) return;
+
+    SD14.stats[stat] += amount || 1;
+
+    SD14Check();
+}
+
+/* 5. PAPARAN TROFI */
+
+var SD14Panel = document.createElement("div");
+
+SD14Panel.style.cssText =
+    "display:none;position:fixed;inset:0;" +
+    "z-index:9000;background:rgba(0,0,0,.96);" +
+    "color:white;padding:18px;box-sizing:border-box;" +
+    "overflow:auto;font-family:Arial;text-align:center;";
+
+document.body.appendChild(SD14Panel);
+
+/* 6. BINA SENARAI TROFI */
+
+function SD14UpdatePanel() {
+    SD14Panel.innerHTML =
+        "<h2>🏆 PENCAPAIAN</h2>" +
+        "<h3>" + SD14.unlocked.length +
+        " / 20 TROFI</h3>";
+
+    var grid = document.createElement("div");
+
+    grid.style.cssText =
+        "display:grid;grid-template-columns:repeat(2,minmax(0,1fr));" +
+        "gap:9px;max-width:600px;margin:auto;";
+
+    SD14.achievements.forEach(function (a, index) {
+        var done = SD14.unlocked.includes(index);
+
+        var card = document.createElement("div");
+
+        card.style.cssText =
+            "padding:12px 6px;border-radius:10px;" +
+            "background:" + (done ? "#72551d" : "#333") +
+            ";border:1px solid #888;";
+
+        var title = document.createElement("b");
+        title.textContent =
+            (done ? "🏆 " : "🔒 ") + a.name;
+
+        var desc = document.createElement("p");
+        desc.textContent = a.desc;
+        desc.style.fontSize = "11px";
+
+        card.appendChild(title);
+        card.appendChild(desc);
+        grid.appendChild(card);
+    });
+
+    SD14Panel.appendChild(grid);
+
+    var close = document.createElement("button");
+    close.textContent = "TUTUP";
+
+    close.style.cssText =
+        "margin:20px;padding:12px 30px;" +
+        "border:0;border-radius:10px;" +
+        "background:#a83232;color:white;font-weight:bold;";
+
+    close.onclick = function () {
+        SD14Panel.style.display = "none";
+    };
+
+    SD14Panel.appendChild(close);
+}
+
+/* 7. BUKA TROFI */
+
+function SD14Open() {
+    SD14UpdatePanel();
+    SD14Panel.style.display = "block";
+}
+
+/* 8. BUTANG TROFI */
+
+var SD14Button = document.createElement("button");
+
+SD14Button.textContent = "🏆 TROFI";
+
+SD14Button.style.cssText =
+    "position:fixed;left:12px;bottom:118px;" +
+    "z-index:2500;padding:10px 14px;" +
+    "background:#72551d;color:white;" +
+    "border:2px solid white;border-radius:12px;" +
+    "font-weight:bold;";
+
+SD14Button.onclick = SD14Open;
+
+document.body.appendChild(SD14Button);
+
+/* 9. RESET */
+
+function SD14Reset() {
+    SD14.unlocked = [];
+
+    Object.keys(SD14.stats).forEach(function (key) {
+        SD14.stats[key] = key === "locations" ? 1 : 0;
+    });
+
+    SD14Save();
+    SD14UpdatePanel();
+}
+
+/* 10. MULAKAN */
+
+SD14Load();
+SD14Check();
+
+console.log("BAHAGIAN 14 AKTIF");
+
+/* =====================================================
+   BAHAGIAN 15 — SAVE GAME DAN CHECKPOINT
+===================================================== */
+
+var SD15 = {
+    saveKey: "SUPER_DURIAN_COMPLETE_SAVE",
+    checkpoint: 0,
+    savedAt: 0,
+    autoSaveCounter: 0,
+    enabled: true
+};
+
+/* 1. AMBIL DATA PERMAINAN */
+
+function SD15GetData() {
+    return {
+        playerX: typeof player !== "undefined"
+            ? player.x
+            : 0,
+
+        playerY: typeof player !== "undefined"
+            ? player.y
+            : 0,
+
+        score: typeof score !== "undefined"
+            ? score
+            : 0,
+
+        lives: typeof lives !== "undefined"
+            ? lives
+            : 3,
+
+        location: typeof SD13 !== "undefined"
+            ? SD13.currentLocation
+            : 0,
+
+        unlockedLocations: typeof SD13 !== "undefined"
+            ? SD13.unlocked
+            : 1,
+
+        coins: typeof SD12 !== "undefined"
+            ? SD12.coins
+            : 0,
+
+        defeatedEnemies: typeof SD9 !== "undefined"
+            ? SD9.defeated
+            : 0,
+
+        bonusOpened: typeof SD11 !== "undefined"
+            ? SD11.bonusOpened
+            : 0,
+
+        savedAt: Date.now()
+    };
+}
+
+/* 2. SIMPAN PERMAINAN */
+
+function SD15SaveGame() {
+    if (!SD15.enabled) return;
+
+    try {
+        var data = SD15GetData();
+
+        localStorage.setItem(
+            SD15.saveKey,
+            JSON.stringify(data)
+        );
+
+        SD15.savedAt = Date.now();
+
+        if (typeof showNotification === "function") {
+            showNotification("PERMAINAN BERJAYA DISIMPAN");
+        }
+
+        return true;
+    } catch (error) {
+        console.warn("Simpanan gagal:", error);
+        return false;
+    }
+}
+
+/* 3. BACA SIMPANAN */
+
+function SD15ReadSave() {
+    try {
+        var saved = localStorage.getItem(SD15.saveKey);
+
+        if (!saved) return null;
+
+        return JSON.parse(saved);
+    } catch (error) {
+        console.warn("Simpanan rosak:", error);
+        return null;
+    }
+}
+
+/* 4. SAMBUNG PERMAINAN */
+
+function SD15Continue() {
+    var data = SD15ReadSave();
+
+    if (!data) {
+        alert("Tiada permainan yang disimpan.");
+        return;
+    }
+
+    if (typeof startGame === "function") {
+        startGame();
+    }
+
+    if (typeof player !== "undefined") {
+        player.x = Number(data.playerX) || 0;
+        player.y = Number(data.playerY) || 0;
+    }
+
+    if (typeof score !== "undefined") {
+        score = Number(data.score) || 0;
+    }
+
+    if (typeof lives !== "undefined") {
+        lives = Number(data.lives) || 3;
+    }
+
+    if (typeof SD13 !== "undefined") {
+        SD13.currentLocation =
+            Number(data.location) || 0;
+
+        SD13.unlocked =
+            Number(data.unlockedLocations) || 1;
+
+        SD13Save();
+    }
+
+    if (typeof SD12 !== "undefined") {
+        SD12.coins = Number(data.coins) || 0;
+        SD12Save();
+    }
+
+    if (typeof SD9 !== "undefined") {
+        SD9.defeated =
+            Number(data.defeatedEnemies) || 0;
+    }
+
+    if (typeof SD11 !== "undefined") {
+        SD11.bonusOpened =
+            Number(data.bonusOpened) || 0;
+
+        SD11UpdatePanel();
+    }
+
+    if (typeof updateHUD === "function") {
+        updateHUD();
+    }
+
+    if (typeof showNotification === "function") {
+        showNotification("SAMBUNG PERMAINAN BERJAYA");
+    }
+}
+
+/* 5. CHECKPOINT */
+
+function SD15SetCheckpoint() {
+    SD15.checkpoint = typeof player !== "undefined"
+        ? player.x
+        : 0;
+
+    SD15SaveGame();
+}
+
+/* 6. KEMBALI KE CHECKPOINT */
+
+function SD15ReturnCheckpoint() {
+    if (typeof player === "undefined") return;
+
+    player.x = SD15.checkpoint;
+
+    if (player.vx !== undefined) {
+        player.vx = 0;
+    }
+
+    if (player.vy !== undefined) {
+        player.vy = 0;
+    }
+
+    if (typeof showNotification === "function") {
+        showNotification("KEMBALI KE CHECKPOINT");
+    }
+}
+
+/* 7. PADAM SIMPANAN */
+
+function SD15DeleteSave() {
+    var confirmDelete = confirm(
+        "Padam semua simpanan permainan?"
+    );
+
+    if (!confirmDelete) return;
+
+    localStorage.removeItem(SD15.saveKey);
+
+    alert("Simpanan telah dipadam.");
+}
+
+/* 8. BUTANG SIMPAN */
+
+var SD15SaveButton = document.createElement("button");
+
+SD15SaveButton.textContent = "💾 SIMPAN";
+
+SD15SaveButton.style.cssText =
+    "position:fixed;right:12px;top:12px;" +
+    "z-index:2500;padding:9px 12px;" +
+    "background:#246b4b;color:white;" +
+    "border:1px solid white;border-radius:9px;" +
+    "font-weight:bold;";
+
+SD15SaveButton.onclick = SD15SaveGame;
+
+document.body.appendChild(SD15SaveButton);
+
+/* 9. BUTANG CHECKPOINT */
+
+var SD15CheckpointButton = document.createElement("button");
+
+SD15CheckpointButton.textContent = "🚩 CHECKPOINT";
+
+SD15CheckpointButton.style.cssText =
+    "position:fixed;right:12px;top:58px;" +
+    "z-index:2500;padding:9px 12px;" +
+    "background:#a65a22;color:white;" +
+    "border:1px solid white;border-radius:9px;" +
+    "font-weight:bold;";
+
+SD15CheckpointButton.onclick = SD15SetCheckpoint;
+
+document.body.appendChild(SD15CheckpointButton);
+
+/* 10. AUTO SAVE */
+
+var SD15PreviousGameLoop = gameLoop;
+
+gameLoop = function (timestamp) {
+    SD15PreviousGameLoop(timestamp);
+
+    if (!SD15.enabled) return;
+
+    SD15.autoSaveCounter++;
+
+    if (SD15.autoSaveCounter >= 900) {
+        SD15.autoSaveCounter = 0;
+
+        try {
+            localStorage.setItem(
+                SD15.saveKey,
+                JSON.stringify(SD15GetData())
+            );
+        } catch (error) {
+            console.warn("Auto save gagal", error);
+        }
+    }
+};
+
+/* 11. RESET */
+
+function SD15Reset() {
+    SD15.checkpoint = 0;
+    SD15.autoSaveCounter = 0;
+    localStorage.removeItem(SD15.saveKey);
+}
+
+/* 12. STATUS */
+
+console.log("BAHAGIAN 15 AKTIF");
+console.log("Sistem simpanan tersedia");
+
+/* =====================================================
+   BAHAGIAN 16 — MUZIK DAN KESAN BUNYI
+===================================================== */
+
+var SD16 = {
+    audio: null,
+    masterVolume: 0.35,
+    musicVolume: 0.18,
+    effectsVolume: 0.65,
+    muted: false,
+    musicEnabled: true,
+    initialized: false,
+    oscillators: [],
+    musicTimer: null
+};
+
+/* 1. MULAKAN AUDIO */
+
+function SD16Init() {
+    if (SD16.initialized) {
+        if (SD16.audio && SD16.audio.state === "suspended") {
+            SD16.audio.resume();
+        }
+        return;
+    }
+
+    var AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) {
+        console.warn("Audio tidak disokong");
+        return;
+    }
+
+    SD16.audio = new AudioContextClass();
+    SD16.initialized = true;
+}
+
+/* 2. HASILKAN NADA */
+
+function SD16Tone(frequency, duration, type, volume) {
+    if (SD16.muted) return;
+
+    SD16Init();
+
+    if (!SD16.audio) return;
+
+    var oscillator = SD16.audio.createOscillator();
+    var gain = SD16.audio.createGain();
+
+    oscillator.type = type || "sine";
+    oscillator.frequency.value = frequency;
+
+    gain.gain.setValueAtTime(
+        0.0001,
+        SD16.audio.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        Math.max(0.0001, volume * SD16.masterVolume),
+        SD16.audio.currentTime + 0.02
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        SD16.audio.currentTime + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(SD16.audio.destination);
+
+    oscillator.start();
+    oscillator.stop(SD16.audio.currentTime + duration);
+}
+
+/* 3. BUNYI LOMPAT */
+
+function SD16Jump() {
+    SD16Tone(420, 0.12, "sine", 0.4);
+    setTimeout(function () {
+        SD16Tone(620, 0.1, "sine", 0.3);
+    }, 60);
+}
+
+/* 4. BUNYI TEMBAKAN */
+
+function SD16Shoot() {
+    SD16Tone(170, 0.08, "square", 0.45);
+}
+
+/* 5. BUNYI KUTIP GANJARAN */
+
+function SD16Collect() {
+    SD16Tone(660, 0.12, "sine", 0.4);
+
+    setTimeout(function () {
+        SD16Tone(880, 0.16, "sine", 0.4);
+    }, 90);
+}
+
+/* 6. BUNYI MUSUH DIKALAHKAN */
+
+function SD16Hit() {
+    SD16Tone(220, 0.1, "triangle", 0.45);
+
+    setTimeout(function () {
+        SD16Tone(130, 0.18, "triangle", 0.4);
+    }, 70);
+}
+
+/* 7. BUNYI MISI SELESAI */
+
+function SD16Mission() {
+    [523, 659, 784, 1046].forEach(function (frequency, index) {
+        setTimeout(function () {
+            SD16Tone(frequency, 0.2, "sine", 0.35);
+        }, index * 140);
+    });
+}
+
+/* 8. BUNYI KOTAK BONUS */
+
+function SD16Bonus() {
+    [440, 554, 659, 880].forEach(function (frequency, index) {
+        setTimeout(function () {
+            SD16Tone(frequency, 0.22, "triangle", 0.4);
+        }, index * 110);
+    });
+}
+
+/* 9. BUNYI AMARAN */
+
+function SD16Warning() {
+    SD16Tone(180, 0.25, "sawtooth", 0.35);
+
+    setTimeout(function () {
+        SD16Tone(180, 0.25, "sawtooth", 0.35);
+    }, 300);
+}
+
+/* 10. MUZIK LATAR ASLI */
+
+function SD16StartMusic() {
+    if (SD16.musicTimer || !SD16.musicEnabled || SD16.muted) {
+        return;
+    }
+
+    SD16Init();
+
+    if (!SD16.audio) return;
+
+    var notes = [
+        261.63, 329.63, 392.00, 329.63,
+        293.66, 349.23, 440.00, 349.23,
+        261.63, 329.63, 392.00, 523.25
+    ];
+
+    var index = 0;
+
+    SD16.musicTimer = setInterval(function () {
+        if (SD16.muted || !SD16.musicEnabled) return;
+
+        SD16Tone(
+            notes[index % notes.length],
+            0.3,
+            "sine",
+            SD16.musicVolume
+        );
+
+        index++;
+    }, 430);
+}
+
+/* 11. HENTIKAN MUZIK */
+
+function SD16StopMusic() {
+    if (SD16.musicTimer) {
+        clearInterval(SD16.musicTimer);
+        SD16.musicTimer = null;
+    }
+}
+
+/* 12. SENYAPKAN AUDIO */
+
+function SD16ToggleMute() {
+    SD16.muted = !SD16.muted;
+
+    if (SD16.muted) {
+        SD16StopMusic();
+    } else if (SD16.musicEnabled) {
+        SD16StartMusic();
+    }
+
+    SD16UpdateButton();
+}
+
+/* 13. KAWAL MUZIK */
+
+function SD16ToggleMusic() {
+    SD16.musicEnabled = !SD16.musicEnabled;
+
+    if (SD16.musicEnabled && !SD16.muted) {
+        SD16StartMusic();
+    } else {
+        SD16StopMusic();
+    }
+
+    SD16UpdateButton();
+}
+
+/* 14. KAWAL KELANTANGAN */
+
+function SD16SetVolume(value) {
+    SD16.masterVolume = Math.max(
+        0,
+        Math.min(1, Number(value))
+    );
+}
+
+/* 15. PAPARAN AUDIO */
+
+var SD16Panel = document.createElement("div");
+
+SD16Panel.style.cssText =
+    "position:fixed;right:10px;top:105px;" +
+    "z-index:2600;background:rgba(0,0,0,.8);" +
+    "padding:9px;border-radius:10px;color:white;" +
+    "font:12px Arial;";
+
+SD16Panel.innerHTML =
+    "<b>🔊 AUDIO</b><br>" +
+    "<button id='sd16-mute'>BUNYI</button> " +
+    "<button id='sd16-music'>MUZIK</button><br>" +
+    "<input id='sd16-volume' type='range' " +
+    "min='0' max='1' step='0.05' value='0.35'>";
+
+document.body.appendChild(SD16Panel);
+
+/* 16. BUTANG AUDIO */
+
+document.getElementById("sd16-mute").onclick = function () {
+    SD16Init();
+    SD16ToggleMute();
+};
+
+document.getElementById("sd16-music").onclick = function () {
+    SD16Init();
+    SD16ToggleMusic();
+};
+
+document.getElementById("sd16-volume").oninput = function (event) {
+    SD16SetVolume(event.target.value);
+};
+
+/* 17. KEMAS KINI BUTANG */
+
+function SD16UpdateButton() {
+    var mute = document.getElementById("sd16-mute");
+    var music = document.getElementById("sd16-music");
+
+    if (mute) {
+        mute.textContent = SD16.muted ? "SENYAP" : "BUNYI";
+    }
+
+    if (music) {
+        music.textContent =
+            SD16.musicEnabled ? "MUZIK ON" : "MUZIK OFF";
+    }
+}
+
+/* 18. MULAKAN AUDIO APABILA SENTUH */
+
+document.addEventListener("pointerdown", function () {
+    SD16Init();
+}, { once: true });
+
+/* 19. RESET AUDIO */
+
+function SD16Reset() {
+    SD16StopMusic();
+    SD16.muted = false;
+    SD16.musicEnabled = true;
+    SD16.masterVolume = 0.35;
+    SD16UpdateButton();
+}
+
+/* 20. STATUS */
+
+console.log("BAHAGIAN 16 AKTIF");
+
+/* =====================================================
+   BAHAGIAN 17 — ANIMASI WATAK
+===================================================== */
+
+var SD17 = {
+    frame: 0,
+    state: "idle",
+    timer: 0,
+    blink: 0,
+    previousX: 0,
+    previousY: 0,
+    hitTimer: 0,
+    deathTimer: 0
+};
+
+/* 1. TENTUKAN KEADAAN WATAK */
+
+function SD17UpdateState() {
+    if (typeof player === "undefined") return;
+
+    if (typeof lives !== "undefined" && lives <= 0) {
+        SD17.state = "dead";
+        return;
+    }
+
+    if (player.attacking || player.isAttacking) {
+        SD17.state = "attack";
+    } else if (player.vy < -1) {
+        SD17.state = "jump";
+    } else if (player.vy > 2) {
+        SD17.state = "fall";
+    } else if (Math.abs(player.x - SD17.previousX) > 0.5) {
+        SD17.state = "walk";
+    } else {
+        SD17.state = "idle";
+    }
+
+    SD17.previousX = player.x;
+    SD17.previousY = player.y;
+
+    SD17.timer++;
+
+    if (SD17.timer > 8) {
+        SD17.timer = 0;
+        SD17.frame++;
+    }
+
+    SD17.blink++;
+
+    if (SD17.blink > 240) {
+        SD17.blink = 0;
+    }
+}
+
+/* 2. LUKIS WATAK MANUSIA */
+
+function SD17DrawCharacter() {
+    if (typeof ctx === "undefined" ||
+        typeof player === "undefined") return;
+
+    var camera = typeof cameraX !== "undefined"
+        ? cameraX
+        : 0;
+
+    var x = player.x - camera;
+    var y = player.y;
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    if (player.facing === -1) {
+        ctx.scale(-1, 1);
+    }
+
+    var moving = SD17.state === "walk";
+    var jumping = SD17.state === "jump";
+    var attacking = SD17.state === "attack";
+
+    var swing = moving
+        ? Math.sin(SD17.frame * 0.8) * 8
+        : 0;
+
+    var bob = moving
+        ? Math.abs(Math.sin(SD17.frame * 0.8)) * 3
+        : 0;
+
+    ctx.translate(0, -bob);
+
+    /* Bayang */
+    ctx.fillStyle = "rgba(0,0,0,.22)";
+    ctx.beginPath();
+    ctx.ellipse(0, 5, 19, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Kaki */
+    ctx.strokeStyle = "#243b55";
+    ctx.lineWidth = 7;
+    ctx.lineCap = "round";
+
+    ctx.beginPath();
+    ctx.moveTo(-6, -23);
+    ctx.lineTo(-8 + swing, -5);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(6, -23);
+    ctx.lineTo(8 - swing, -5);
+    ctx.stroke();
+
+    /* Kasut */
+    ctx.fillStyle = "#252525";
+    ctx.fillRect(-17 + swing, -8, 13, 6);
+    ctx.fillRect(4 - swing, -8, 13, 6);
+
+    /* Badan */
+    ctx.fillStyle = "#1976d2";
+    ctx.beginPath();
+    ctx.roundRect(-13, -52, 26, 31, 7);
+    ctx.fill();
+
+    /* Lengan */
+    ctx.strokeStyle = "#d99a67";
+    ctx.lineWidth = 7;
+
+    ctx.beginPath();
+    ctx.moveTo(-12, -46);
+    ctx.lineTo(-19 - swing, -29);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(12, -46);
+    ctx.lineTo(
+        attacking ? 28 : 19 + swing,
+        attacking ? -43 : -29
+    );
+    ctx.stroke();
+
+    /* Leher */
+    ctx.fillStyle = "#d99a67";
+    ctx.fillRect(-5, -59, 10, 10);
+
+    /* Kepala */
+    ctx.fillStyle = "#d99a67";
+    ctx.beginPath();
+    ctx.arc(0, -69, 13, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Rambut */
+    ctx.fillStyle = "#25201d";
+    ctx.beginPath();
+    ctx.arc(0, -74, 13, Math.PI, Math.PI * 2);
+    ctx.fill();
+
+    /* Mata */
+    ctx.fillStyle = "#171717";
+
+    if (SD17.blink < 235) {
+        ctx.fillRect(4, -70, 2, 3);
+    }
+
+    /* Mulut */
+    ctx.strokeStyle = "#743f30";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(3, -62);
+    ctx.lineTo(7, -62);
+    ctx.stroke();
+
+    /* Kesan melompat */
+    if (jumping) {
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-22, -35);
+        ctx.lineTo(-29, -45);
+        ctx.moveTo(22, -35);
+        ctx.lineTo(29, -45);
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+/* 3. KESAN SERANGAN */
+
+function SD17AttackEffect() {
+    if (typeof ctx === "undefined" ||
+        typeof player === "undefined") return;
+
+    if (!(player.attacking || player.isAttacking)) return;
+
+    var camera = typeof cameraX !== "undefined"
+        ? cameraX
+        : 0;
+
+    var x = player.x - camera;
+    var y = player.y - 45;
+
+    ctx.save();
+    ctx.strokeStyle = "#ffe66d";
+    ctx.lineWidth = 4;
+
+    ctx.beginPath();
+    ctx.arc(
+        x + 25,
+        y,
+        25,
+        -0.8,
+        0.8
+    );
+
+    ctx.stroke();
+    ctx.restore();
+}
+
+/* 4. KESAN KEROSAKAN */
+
+function SD17HitEffect() {
+    if (typeof ctx === "undefined") return;
+
+    if (SD17.hitTimer <= 0) return;
+
+    SD17.hitTimer--;
+
+    ctx.save();
+    ctx.fillStyle = "rgba(255,0,0,.13)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+}
+
+/* 5. PENCETUS KESAN TERKENA */
+
+function SD17Hurt() {
+    SD17.hitTimer = 8;
+}
+
+/* 6. PAPAR ANIMASI */
+
+function SD17Render() {
+    SD17UpdateState();
+    SD17DrawCharacter();
+    SD17AttackEffect();
+    SD17HitEffect();
+}
+
+/* 7. SAMBUNGAN PAPARAN */
+
+var SD17PreviousRenderGame = renderGame;
+
+renderGame = function () {
+    SD17PreviousRenderGame();
+    SD17Render();
+};
+
+/* 8. STATUS */
+
+console.log("BAHAGIAN 17 AKTIF");
+
+/* =====================================================
+   BAHAGIAN 18 — NPC DAN SISTEM DIALOG
+===================================================== */
+
+var SD18 = {
+    npcs: [],
+    activeNPC: null,
+    dialogIndex: 0,
+    dialogOpen: false,
+    dialogTimer: 0,
+    interactionRange: 90
+};
+
+/* 1. SENARAI WATAK NPC */
+
+SD18.npcs = [
+    {
+        id: 1,
+        name: "Pak Ahmad",
+        x: 420,
+        y: 0,
+        color: "#795548",
+        role: "Penduduk Kampung",
+        dialogs: [
+            "Assalamualaikum, anak muda!",
+            "Kampung kita perlu dijaga bersama.",
+            "Jangan buang sampah merata-rata.",
+            "Mulakan kebaikan walaupun kecil."
+        ]
+    },
+    {
+        id: 2,
+        name: "Aminah",
+        x: 900,
+        y: 0,
+        color: "#ad1457",
+        role: "Penduduk Kampung",
+        dialogs: [
+            "Saya sedang mengumpulkan botol plastik.",
+            "Botol ini boleh dikitar semula.",
+            "Mari kita jaga kebersihan alam."
+        ]
+    },
+    {
+        id: 3,
+        name: "Ustaz Harun",
+        x: 1450,
+        y: 0,
+        color: "#2e7d32",
+        role: "Guru",
+        dialogs: [
+            "Assalamualaikum.",
+            "Jadilah insan yang berakhlak mulia.",
+            "Ilmu perlu diamalkan dalam kehidupan.",
+            "Buatlah kebaikan dengan ikhlas."
+        ]
+    },
+    {
+        id: 4,
+        name: "Pak Salleh",
+        x: 2050,
+        y: 0,
+        color: "#ef6c00",
+        role: "Petani",
+        dialogs: [
+            "Pokok memberi manfaat kepada manusia.",
+            "Jagalah tumbuhan dan alam sekitar.",
+            "Tanamlah sesuatu yang bermanfaat."
+        ]
+    },
+    {
+        id: 5,
+        name: "Adik Yusuf",
+        x: 2650,
+        y: 0,
+        color: "#1565c0",
+        role: "Kanak-kanak",
+        dialogs: [
+            "Abang, boleh tolong saya?",
+            "Arnab saya telah tersesat.",
+            "Tolong selamatkan arnab itu!"
+        ]
+    }
+];
+
+/* 2. KEDUDUKAN NPC */
+
+function SD18SetNPCPositions() {
+    SD18.npcs.forEach(function (npc) {
+        if (typeof groundY !== "undefined") {
+            npc.y = groundY;
+        } else if (typeof canvas !== "undefined") {
+            npc.y = canvas.height - 100;
+        }
+    });
+}
+
+/* 3. LUKIS NPC */
+
+function SD18DrawNPC(npc) {
+    if (typeof ctx === "undefined") return;
+
+    var camera = typeof cameraX !== "undefined"
+        ? cameraX
+        : 0;
+
+    var x = npc.x - camera;
+    var y = npc.y;
+
+    if (x < -100 || x > canvas.width + 100) return;
+
+    ctx.save();
+
+    /* Bayang */
+    ctx.fillStyle = "rgba(0,0,0,.2)";
+    ctx.beginPath();
+    ctx.ellipse(x, y + 4, 17, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Kaki */
+    ctx.strokeStyle = "#333";
+    ctx.lineWidth = 6;
+
+    ctx.beginPath();
+    ctx.moveTo(x - 6, y - 22);
+    ctx.lineTo(x - 8, y - 5);
+    ctx.moveTo(x + 6, y - 22);
+    ctx.lineTo(x + 8, y - 5);
+    ctx.stroke();
+
+    /* Badan */
+    ctx.fillStyle = npc.color;
+    ctx.beginPath();
+    ctx.roundRect(x - 12, y - 52, 24, 30, 6);
+    ctx.fill();
+
+    /* Kepala */
+    ctx.fillStyle = "#d99a67";
+    ctx.beginPath();
+    ctx.arc(x, y - 63, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* Rambut */
+    ctx.fillStyle = "#28201c";
+    ctx.beginPath();
+    ctx.arc(x, y - 68, 12, Math.PI, Math.PI * 2);
+    ctx.fill();
+
+    /* Nama */
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 12px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(npc.name, x, y - 83);
+
+    /* Tanda interaksi */
+    if (SD18.activeNPC === npc) {
+        ctx.fillStyle = "#ffeb3b";
+        ctx.beginPath();
+        ctx.arc(x, y - 100, 9, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#222";
+        ctx.font = "bold 12px Arial";
+        ctx.fillText("!", x, y - 96);
+    }
+
+    ctx.restore();
+}
+
+/* 4. CARI NPC TERDEKAT */
+
+function SD18FindNearestNPC() {
+    if (typeof player === "undefined") return null;
+
+    var nearest = null;
+    var nearestDistance = SD18.interactionRange;
+
+    SD18.npcs.forEach(function (npc) {
+        var distance = Math.abs(player.x - npc.x);
+
+        if (distance < nearestDistance) {
+            nearest = npc;
+            nearestDistance = distance;
+        }
+    });
+
+    return nearest;
+}
+
+/* 5. PAPAR DIALOG */
+
+function SD18ShowDialog(npc) {
+    var panel = document.getElementById("sd18-dialog");
+
+    if (!panel) {
+        panel = document.createElement("div");
+        panel.id = "sd18-dialog";
+
+        panel.style.cssText = `
+            position:fixed;
+            left:5%;
+            bottom:18%;
+            width:90%;
+            max-width:500px;
+            background:rgba(12,30,40,.96);
+            color:white;
+            border:2px solid #f5c542;
+            border-radius:15px;
+            padding:15px;
+            z-index:9998;
+            font-family:Arial;
+            box-sizing:border-box;
+        `;
+
+        document.body.appendChild(panel);
+    }
+
+    var message = npc.dialogs[SD18.dialogIndex];
+
+    panel.innerHTML = `
+        <div style="color:#ffd54f;font-weight:bold;font-size:17px">
+            ${npc.name}
+        </div>
+        <div style="margin:12px 0;font-size:15px;line-height:1.6">
+            ${message}
+        </div>
+        <button id="sd18-next"
+            style="background:#f5c542;color:#222;
+            border:0;border-radius:9px;padding:10px 20px;
+            font-weight:bold">
+            ${SD18.dialogIndex >= npc.dialogs.length - 1
+                ? "TUTUP"
+                : "SETERUSNYA"}
+        </button>
+    `;
+
+    panel.style.display = "block";
+
+    document.getElementById("sd18-next").onclick = function () {
+        SD18NextDialog();
+    };
+}
+
+/* 6. DIALOG SETERUSNYA */
+
+function SD18NextDialog() {
+    if (!SD18.activeNPC) return;
+
+    SD18.dialogIndex++;
+
+    if (SD18.dialogIndex >= SD18.activeNPC.dialogs.length) {
+        SD18CloseDialog();
+        return;
+    }
+
+    SD18ShowDialog(SD18.activeNPC);
+}
+
+/* 7. TUTUP DIALOG */
+
+function SD18CloseDialog() {
+    var panel = document.getElementById("sd18-dialog");
+
+    if (panel) {
+        panel.style.display = "none";
+    }
+
+    SD18.dialogOpen = false;
+    SD18.dialogIndex = 0;
+    SD18.activeNPC = null;
+}
+
+/* 8. MULAKAN INTERAKSI */
+
+function SD18Interact() {
+    if (SD18.dialogOpen) {
+        SD18NextDialog();
+        return;
+    }
+
+    var npc = SD18FindNearestNPC();
+
+    if (!npc) {
+        if (typeof showNotification === "function") {
+            showNotification("Tiada penduduk berdekatan");
+        }
+        return;
+    }
+
+    SD18.activeNPC = npc;
+    SD18.dialogIndex = 0;
+    SD18.dialogOpen = true;
+
+    SD18ShowDialog(npc);
+}
+
+/* 9. BUTANG INTERAKSI */
+
+(function () {
+    var button = document.createElement("button");
+
+    button.id = "sd18-interact";
+    button.textContent = "BERCAKAP";
+
+    button.style.cssText = `
+        position:fixed;
+        right:18px;
+        bottom:155px;
+        z-index:9997;
+        padding:13px 17px;
+        border:2px solid white;
+        border-radius:30px;
+        background:#f5c542;
+        color:#222;
+        font-weight:bold;
+        display:none;
+    `;
+
+    button.onclick = SD18Interact;
+
+    document.body.appendChild(button);
+})();
+
+/* 10. KEMAS KINI NPC */
+
+function SD18Update() {
+    SD18SetNPCPositions();
+
+    var nearest = SD18FindNearestNPC();
+    var button = document.getElementById("sd18-interact");
+
+    if (!SD18.dialogOpen) {
+        SD18.activeNPC = nearest;
+
+        if (button) {
+            button.style.display = nearest ? "block" : "none";
+        }
+    } else if (button) {
+        button.style.display = "none";
+    }
+}
+
+/* 11. PAPAR SEMUA NPC */
+
+function SD18Render() {
+    SD18.npcs.forEach(SD18DrawNPC);
+}
+
+/* 12. SAMBUNGAN GELUNG */
+
+var SD18PreviousUpdate = updateGame;
+
+if (typeof SD18PreviousUpdate === "function") {
+    updateGame = function () {
+        SD18PreviousUpdate();
+        SD18Update();
+    };
+}
+
+var SD18PreviousRender = renderGame;
+
+renderGame = function () {
+    SD18PreviousRender();
+    SD18Render();
+};
+
+/* 13. STATUS */
+
+console.log("BAHAGIAN 18 AKTIF");
+
+/* =====================================================
+   BAHAGIAN 19 — SISTEM KEMAJUAN 20 MISI
+===================================================== */
+
+var SD19 = {
+    currentMission: 0,
+    completed: [],
+    total: 20,
+    rewards: 0,
+    storageKey: "SUPER_DURIAN_SD19"
+};
+
+/* 1. SENARAI 20 MISI */
+
+SD19.missions = [
+    "Kutip Botol Plastik",
+    "Kitar Semula Tin",
+    "Selamatkan Arnab",
+    "Berkongsi Rezeki",
+    "Tabung Masjid",
+    "Bersihkan Kawasan Kampung",
+    "Tanam Pokok",
+    "Bantu Orang Tua",
+    "Selamatkan Anak Kucing",
+    "Kutip Sampah",
+    "Bantu Jiran",
+    "Jaga Kebersihan Sungai",
+    "Beri Makanan Haiwan",
+    "Bantu Rakan",
+    "Kumpul Buku Terpakai",
+    "Jimatkan Air",
+    "Jimatkan Elektrik",
+    "Bersihkan Masjid",
+    "Bantu Kanak-kanak",
+    "Jadilah Wira Jatidiri"
+];
+
+/* 2. SIMPAN DATA */
+
+function SD19Save() {
+    try {
+        localStorage.setItem(
+            SD19.storageKey,
+            JSON.stringify({
+                currentMission: SD19.currentMission,
+                completed: SD19.completed,
+                rewards: SD19.rewards
+            })
+        );
+    } catch (e) {
+        console.warn("SD19: Gagal menyimpan data", e);
+    }
+}
+
+/* 3. MUAT DATA */
+
+function SD19Load() {
+    try {
+        var saved = localStorage.getItem(SD19.storageKey);
+
+        if (!saved) return;
+
+        var data = JSON.parse(saved);
+
+        if (Array.isArray(data.completed)) {
+            SD19.completed = data.completed.filter(function (n) {
+                return Number.isInteger(n) &&
+                    n >= 0 && n < SD19.total;
+            });
+        }
+
+        SD19.currentMission = Math.max(
+            0,
+            Math.min(19, Number(data.currentMission) || 0)
+        );
+
+        SD19.rewards = Math.max(
+            0,
+            Number(data.rewards) || 0
+        );
+
+    } catch (e) {
+        console.warn("SD19: Data simpanan tidak dapat dibaca");
+    }
+}
+
+/* 4. SEMAK MISI */
+
+function SD19IsCompleted(index) {
+    return SD19.completed.indexOf(index) !== -1;
+}
+
+/* 5. SELESAIKAN MISI */
+
+function SD19Complete(index) {
+    index = Number(index);
+
+    if (!Number.isInteger(index) ||
+        index < 0 ||
+        index >= SD19.total) {
+        return false;
+    }
+
+    if (SD19IsCompleted(index)) {
+        return false;
+    }
+
+    SD19.completed.push(index);
+    SD19.rewards += 100;
+
+    SD19.currentMission = Math.min(
+        19,
+        index + 1
+    );
+
+    SD19Save();
+    SD19ShowMessage(index);
+
+    if (typeof score !== "undefined") {
+        score += 100;
+    }
+
+    if (typeof updateHUD === "function") {
+        updateHUD();
+    }
+
+    return true;
+}
+
+/* 6. MESEJ KEJAYAAN */
+
+function SD19ShowMessage(index) {
+    var old = document.getElementById("sd19-message");
+
+    if (old) old.remove();
+
+    var box = document.createElement("div");
+
+    box.id = "sd19-message";
+
+    box.style.cssText = `
+        position:fixed;
+        left:50%;
+        top:25%;
+        transform:translateX(-50%);
+        width:85%;
+        max-width:380px;
+        background:rgba(10,40,30,.96);
+        color:white;
+        border:3px solid #ffca28;
+        border-radius:18px;
+        padding:20px;
+        text-align:center;
+        z-index:10001;
+        font-family:Arial;
+        box-sizing:border-box;
+    `;
+
+    box.innerHTML = `
+        <div style="font-size:38px">🏆</div>
+        <div style="font-size:21px;font-weight:bold;color:#ffca28">
+            MISI SELESAI!
+        </div>
+        <div style="margin:12px 0">
+            ${SD19.missions[index]}
+        </div>
+        <div style="color:#80e27e;font-weight:bold">
+            +100 MATA GANJARAN
+        </div>
+        <button id="sd19-close"
+            style="margin-top:15px;padding:10px 25px;
+            border:0;border-radius:10px;
+            background:#ffca28;font-weight:bold">
+            TERUSKAN
+        </button>
+    `;
+
+    document.body.appendChild(box);
+
+    document.getElementById("sd19-close").onclick = function () {
+        box.remove();
+    };
+}
+
+/* 7. PAPAR SENARAI MISI */
+
+function SD19OpenPanel() {
+    var panel = document.getElementById("sd19-panel");
+
+    if (panel) {
+        panel.remove();
+        return;
+    }
+
+    panel = document.createElement("div");
+    panel.id = "sd19-panel";
+
+    panel.style.cssText = `
+        position:fixed;
+        inset:5%;
+        background:rgba(10,25,35,.98);
+        color:white;
+        z-index:10000;
+        border:2px solid #ffca28;
+        border-radius:16px;
+        padding:16px;
+        overflow-y:auto;
+        font-family:Arial;
+        box-sizing:border-box;
+    `;
+
+    var html = `
+        <div style="display:flex;justify-content:space-between;
+            align-items:center">
+            <h2 style="color:#ffca28;margin:5px 0">
+                20 MISI SUPER DURIAN
+            </h2>
+            <button id="sd19-panel-close"
+                style="padding:8px 13px;border:0;
+                border-radius:8px">✕</button>
+        </div>
+
+        <p>
+            Kemajuan:
+            <b>${SD19.completed.length}/20</b>
+        </p>
+
+        <div style="background:#444;height:12px;border-radius:20px;
+            overflow:hidden">
+            <div style="height:100%;width:${
+                SD19.completed.length / 20 * 100
+            }%;background:#66bb6a"></div>
+        </div>
+
+        <p>Ganjaran: 🪙 ${SD19.rewards}</p>
+        <hr>
+    `;
+
+    SD19.missions.forEach(function (mission, i) {
+        var done = SD19IsCompleted(i);
+
+        html += `
+            <div style="display:flex;align-items:center;
+                gap:10px;padding:11px 5px;
+                border-bottom:1px solid #455a64">
+                <div style="font-size:22px">
+                    ${done ? "✅" : "🔒"}
+                </div>
+                <div style="flex:1">
+                    <b>Misi ${i + 1}</b><br>
+                    <span>${mission}</span>
+                </div>
+                <span style="color:${done ? "#81c784" : "#aaa"}">
+                    ${done ? "SELESAI" : "BELUM"}
+                </span>
+            </div>
+        `;
+    });
+
+    html += `
+        <button id="sd19-panel-bottom"
+            style="width:100%;margin-top:18px;
+            padding:13px;background:#ffca28;
+            border:0;border-radius:10px;font-weight:bold">
+            TUTUP
+        </button>
+    `;
+
+    panel.innerHTML = html;
+    document.body.appendChild(panel);
+
+    document.getElementById("sd19-panel-close").onclick =
+        function () { panel.remove(); };
+
+    document.getElementById("sd19-panel-bottom").onclick =
+        function () { panel.remove(); };
+}
+
+/* 8. BUTANG MISI */
+
+(function () {
+    var button = document.createElement("button");
+
+    button.id = "sd19-mission-button";
+    button.textContent = "📜 MISI";
+
+    button.style.cssText = `
+        position:fixed;
+        left:15px;
+        top:95px;
+        z-index:9996;
+        padding:10px 13px;
+        border:2px solid white;
+        border-radius:25px;
+        background:#263238;
+        color:white;
+        font-weight:bold;
+    `;
+
+    button.onclick = SD19OpenPanel;
+
+    document.body.appendChild(button);
+})();
+
+/* 9. PAPAR STATUS MISI */
+
+function SD19GetProgress() {
+    return {
+        completed: SD19.completed.length,
+        total: SD19.total,
+        percentage: Math.round(
+            SD19.completed.length / SD19.total * 100
+        ),
+        rewards: SD19.rewards
+    };
+}
+
+/* 10. RESET DATA MISI */
+
+function SD19Reset() {
+    SD19.currentMission = 0;
+    SD19.completed = [];
+    SD19.rewards = 0;
+
+    SD19Save();
+}
+
+/* 11. MUAT DATA SEMASA */
+
+SD19Load();
+
+/* 12. STATUS */
+
+console.log("BAHAGIAN 19 AKTIF");
+console.log("Kemajuan:", SD19GetProgress());
+
+/* =====================================================
+   BAHAGIAN 20 — PENAMAT SUPER DURIAN
+===================================================== */
+
+var SD20 = {
+    finished: false,
+    certificateShown: false,
+    endingTime: null
+};
+
+/* 1. SEMAK SEMUA MISI */
+
+function SD20AllMissionsComplete() {
+    if (typeof SD19 === "undefined") return false;
+
+    return SD19.completed.length >= 20;
+}
+
+/* 2. SEMAK KEMENANGAN */
+
+function SD20CheckVictory() {
+    if (SD20.finished) return;
+
+    if (!SD20AllMissionsComplete()) {
+        return;
+    }
+
+    SD20.finished = true;
+    SD20.endingTime = new Date().toLocaleString("ms-MY");
+
+    SD20ShowVictory();
+}
+
+/* 3. SKRIN KEMENANGAN */
+
+function SD20ShowVictory() {
+    var old = document.getElementById("sd20-victory");
+
+    if (old) old.remove();
+
+    var panel = document.createElement("div");
+
+    panel.id = "sd20-victory";
+
+    panel.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:20000;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:18px;
+        background:rgba(5,20,25,.97);
+        color:white;
+        font-family:Arial;
+        text-align:center;
+        box-sizing:border-box;
+        overflow:auto;
+    `;
+
+    panel.innerHTML = `
+        <div style="width:100%;max-width:480px">
+            <div style="font-size:75px">🏆</div>
+
+            <h1 style="color:#ffca28;font-size:30px">
+                TAHNIAH, WIRA JATIDIRI!
+            </h1>
+
+            <p style="font-size:18px;line-height:1.7">
+                Anda telah menyelesaikan kesemua
+                20 misi SUPER DURIAN.
+            </p>
+
+            <div style="
+                margin:20px 0;
+                padding:18px;
+                border:2px solid #ffca28;
+                border-radius:15px;
+                background:#173b32">
+
+                <div style="font-size:22px;font-weight:bold">
+                    20 / 20 MISI SELESAI
+                </div>
+
+                <div style="font-size:17px;margin-top:10px">
+                    🪙 GANJARAN: ${SD19.rewards}
+                </div>
+            </div>
+
+            <p style="color:#cfd8dc">
+                Teruskan amalan kebaikan dalam kehidupan sebenar.
+                Jadilah insan yang bermanfaat kepada semua.
+            </p>
+
+            <button id="sd20-certificate"
+                style="width:100%;padding:14px;margin:7px 0;
+                border:0;border-radius:12px;
+                background:#ffca28;color:#222;
+                font-size:16px;font-weight:bold">
+                🎓 LIHAT SIJIL
+            </button>
+
+            <button id="sd20-replay"
+                style="width:100%;padding:14px;margin:7px 0;
+                border:1px solid white;border-radius:12px;
+                background:#263238;color:white;
+                font-size:16px;font-weight:bold">
+                🔄 MAIN SEMULA
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(panel);
+
+    document.getElementById("sd20-certificate").onclick =
+        SD20ShowCertificate;
+
+    document.getElementById("sd20-replay").onclick =
+        SD20Replay;
+}
+
+/* 4. SIJIL DIGITAL */
+
+function SD20ShowCertificate() {
+    var old = document.getElementById("sd20-certificate-panel");
+
+    if (old) old.remove();
+
+    var cert = document.createElement("div");
+
+    cert.id = "sd20-certificate-panel";
+
+    cert.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:21000;
+        background:rgba(0,0,0,.94);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:15px;
+        box-sizing:border-box;
+    `;
+
+    cert.innerHTML = `
+        <div id="sd20-certificate-paper"
+            style="
+            width:100%;
+            max-width:650px;
+            padding:28px 18px;
+            background:#fff8dc;
+            color:#263238;
+            border:9px double #b8860b;
+            text-align:center;
+            box-sizing:border-box;
+            font-family:Georgia,serif">
+
+            <div style="font-size:42px">🏅</div>
+
+            <h1 style="color:#805600">
+                SIJIL PENGHARGAAN
+            </h1>
+
+            <h2>SUPER DURIAN</h2>
+
+            <p style="font-size:18px">
+                Dengan ini diperakui bahawa
+            </p>
+
+            <h2 style="
+                border-bottom:1px solid #b8860b;
+                padding:12px">
+                WIRA JATIDIRI
+            </h2>
+
+            <p style="line-height:1.8">
+                Telah berjaya menyelesaikan
+                kesemua 20 misi permainan
+                SUPER DURIAN.
+            </p>
+
+            <p style="font-size:14px">
+                Semoga nilai kebaikan, amanah,
+                kebersihan dan kasih sayang
+                terus diamalkan dalam kehidupan.
+            </p>
+
+            <p style="margin-top:30px;font-size:13px">
+                Tarikh: ${SD20.endingTime || ""}
+            </p>
+
+            <div style="margin-top:25px;font-weight:bold">
+                WIRA JATIDIRI
+            </div>
+        </div>
+
+        <div style="
+            position:absolute;
+            bottom:15px;
+            display:flex;
+            gap:10px">
+
+            <button id="sd20-print"
+                style="padding:12px 20px;
+                background:#ffca28;border:0;
+                border-radius:9px;font-weight:bold">
+                CETAK SIJIL
+            </button>
+
+            <button id="sd20-close-cert"
+                style="padding:12px 20px;
+                background:white;border:0;
+                border-radius:9px;font-weight:bold">
+                TUTUP
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(cert);
+
+    document.getElementById("sd20-close-cert").onclick =
+        function () {
+            cert.remove();
+        };
+
+    document.getElementById("sd20-print").onclick =
+        function () {
+            var paper = document.getElementById(
+                "sd20-certificate-paper"
+            );
+
+            var printWindow = window.open("", "_blank");
+
+            if (!printWindow) {
+                alert("Benarkan pop-up untuk mencetak sijil.");
+                return;
+            }
+
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Sijil SUPER DURIAN</title>
+                    <style>
+                        body {
+                            margin:20px;
+                            display:flex;
+                            justify-content:center;
+                            font-family:Georgia,serif;
+                        }
+                        #paper {
+                            width:100%;
+                            max-width:700px;
+                            padding:35px;
+                            border:9px double #b8860b;
+                            text-align:center;
+                            background:#fff8dc;
+                            box-sizing:border-box;
+                        }
+                        @media print {
+                            body { margin:0; }
+                            #paper {
+                                width:100%;
+                                max-width:none;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div id="paper">
+                        ${paper.innerHTML}
+                    </div>
+                    <script>
+                        window.onload = function () {
+                            window.print();
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+
+            printWindow.document.close();
+        };
+}
+
+/* 5. MAIN SEMULA */
+
+function SD20Replay() {
+    if (!confirm("Main semula permainan? Kemajuan 20 misi akan dikekalkan.")) {
+        return;
+    }
+
+    SD20.finished = false;
+    SD20.certificateShown = false;
+
+    var panel = document.getElementById("sd20-victory");
+
+    if (panel) panel.remove();
+
+    if (typeof startGame === "function") {
+        startGame();
+    }
+}
+
+/* 6. BUTANG SEMAK KEMENANGAN */
+
+function SD20MissionCompleted(index) {
+    if (typeof SD19Complete === "function") {
+        SD19Complete(index);
+    }
+
+    SD20CheckVictory();
+}
+
+/* 7. SEMAK SELEPAS DATA DIMUAT */
+
+function SD20Init() {
+    if (SD20AllMissionsComplete()) {
+        SD20.finished = true;
+    }
+}
+
+/* 8. STATUS AKHIR */
+
+SD20Init();
+
+console.log("BAHAGIAN 20 AKTIF");
+console.log("Sistem penamat SUPER DURIAN tersedia.");
+
+</script>
+</body>
+</html>
